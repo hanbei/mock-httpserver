@@ -2,7 +2,6 @@ package de.hanbei.httpserver;
 
 import de.hanbei.httpserver.handler.MockHandler;
 import org.apache.http.HttpResponse;
-import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -11,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.SocketException;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -41,14 +41,12 @@ public class MockHttpServerTest {
         assertEquals(1, mockHandler.getHandlerCalled());
     }
 
-    @Test(expected = NoHttpResponseException.class)
+    @Test(expected = SocketException.class)
     public void testTimeout() throws IOException {
         httpServer.setTimeout(true);
         HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet("http://localhost:7001/");
         HttpResponse response = httpclient.execute(httpget);
-        //assertEquals(200, response.getStatusLine().getStatusCode());
-        assertEquals(0, mockHandler.getHandlerCalled());
     }
 
     @Test
