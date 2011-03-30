@@ -35,17 +35,27 @@ public class MockHttpServerTest {
     @Test
     public void testHandlerCalled() throws IOException {
         HttpClient httpclient = new DefaultHttpClient();
-        HttpGet httpget = new HttpGet("http://localhost:7001/");
+        HttpGet httpget = new HttpGet("http://localhost:7001/test");
         HttpResponse response = httpclient.execute(httpget);
         assertEquals(200, response.getStatusLine().getStatusCode());
         assertEquals(1, mockHandler.getHandlerCalled());
     }
 
+    @Test
+    public void testHandlerCalled2() throws IOException {
+        HttpClient httpclient = new DefaultHttpClient();
+        HttpGet httpget = new HttpGet("http://localhost:7001/test2");
+        HttpResponse response = httpclient.execute(httpget);
+        assertEquals(200, response.getStatusLine().getStatusCode());
+        assertEquals(1, mockHandler.getHandlerCalled());
+    }
+
+
     @Test(expected = NoHttpResponseException.class)
     public void testTimeout() throws IOException {
         httpServer.setTimeout(true);
         HttpClient httpclient = new DefaultHttpClient();
-        HttpGet httpget = new HttpGet("http://localhost:7001/");
+        HttpGet httpget = new HttpGet("http://localhost:7001/timeout");
         HttpResponse response = httpclient.execute(httpget);
         //assertEquals(200, response.getStatusLine().getStatusCode());
         assertEquals(0, mockHandler.getHandlerCalled());
