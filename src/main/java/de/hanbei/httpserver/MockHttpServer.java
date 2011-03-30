@@ -1,7 +1,5 @@
 package de.hanbei.httpserver;
 
-import de.hanbei.httpserver.handler.DummyHandler;
-import de.hanbei.httpserver.handler.HttpHandler;
 import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.request.RequestParser;
 import de.hanbei.httpserver.response.Response;
@@ -13,6 +11,9 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MockHttpServer implements Runnable {
 
@@ -21,7 +22,9 @@ public class MockHttpServer implements Runnable {
 
     private int port;
     private ServerSocket serverSocket;
-    private HttpHandler handler;
+
+    private Map<URI, Response> predefinedResponses;
+    private Response defaultResponse;
 
     private boolean stopped;
     private boolean isStopping;
@@ -29,12 +32,11 @@ public class MockHttpServer implements Runnable {
 
     private Object waiter;
 
-
     public MockHttpServer() {
         this.port = 80;
-        handler = new DummyHandler();
         timeout = false;
         waiter = new Object();
+        predefinedResponses = new HashMap<URI, Response>();
     }
 
     public void start() {
@@ -92,14 +94,6 @@ public class MockHttpServer implements Runnable {
         return !this.serverSocket.isClosed();
     }
 
-    public HttpHandler getHandler() {
-        return handler;
-    }
-
-    public void setHandler(HttpHandler handler) {
-        this.handler = handler;
-    }
-
     public void run() {
         try {
             this.serverSocket = new ServerSocket(MockHttpServer.this.port);
@@ -149,9 +143,7 @@ public class MockHttpServer implements Runnable {
             }
 
 
-            LOGGER.debug(request.toString());
-            Response response = handler.handleRequest(request);
-            LOGGER.debug(response.toString());
+            Response response = getResponse(request);
 
             sendResponse(response, clientSocket);
         } catch (IOException e) {
@@ -163,6 +155,17 @@ public class MockHttpServer implements Runnable {
                 LOGGER.warn("", e);
             }
         }
+    }
+
+    private Response getResponse(Request request) {
+        LOGGER.debug(request.toString());
+        URI requestUri = request.getRequestUri();
+        Response response = predefinedResponses.get(requestUri);
+        if (response == null) {
+            response = defaultResponse;
+        }
+        LOGGER.debug(response.toString());
+        return response;
     }
 
     private Request readRequest(Socket clientSocket) throws IOException {
@@ -185,6 +188,18 @@ public class MockHttpServer implements Runnable {
         out.println("HTTP/" + response.getHttpVersion() + " "
                 + response.getStatus().toString());
         out.flush();
+    }
+
+    public Response getDefaultResponse() {
+        return defaultResponse;
+    }
+
+    public void setDefaultResponse(Response defaultResponse) {
+        this.defaultResponse = defaultResponse;
+    }
+
+    public void addResponse(URI uri, Response response) {
+        predefinedResponses.put(uri, response);
     }
 
     public static void main(String[] args) throws IOException {

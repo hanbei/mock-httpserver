@@ -1,6 +1,7 @@
 package de.hanbei.httpserver;
 
-import de.hanbei.httpserver.handler.MockHandler;
+import de.hanbei.httpserver.common.Status;
+import de.hanbei.httpserver.response.Response;
 import org.apache.http.HttpResponse;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpClient;
@@ -11,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URI;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,15 +22,14 @@ import static org.junit.Assert.assertTrue;
 public class MockHttpServerTest {
 
     private MockHttpServer httpServer;
-    private MockHandler mockHandler;
 
     @Before
     public void setUp() throws Exception {
-        mockHandler = new MockHandler();
         this.httpServer = new MockHttpServer();
-        httpServer.setHandler(mockHandler);
         this.httpServer.setPort(7001);
         this.httpServer.start();
+        httpServer.addResponse(new URI("/test"), Response.ok().build());
+        httpServer.addResponse(new URI("/test2"), Response.status(Status.NOT_FOUND).build());
         assertTrue(this.httpServer.isRunning());
     }
 
@@ -38,7 +39,6 @@ public class MockHttpServerTest {
         HttpGet httpget = new HttpGet("http://localhost:7001/test");
         HttpResponse response = httpclient.execute(httpget);
         assertEquals(200, response.getStatusLine().getStatusCode());
-        assertEquals(1, mockHandler.getHandlerCalled());
     }
 
     @Test
@@ -46,8 +46,7 @@ public class MockHttpServerTest {
         HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet("http://localhost:7001/test2");
         HttpResponse response = httpclient.execute(httpget);
-        assertEquals(200, response.getStatusLine().getStatusCode());
-        assertEquals(1, mockHandler.getHandlerCalled());
+        assertEquals(404, response.getStatusLine().getStatusCode());
     }
 
 
@@ -57,8 +56,6 @@ public class MockHttpServerTest {
         HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet("http://localhost:7001/timeout");
         HttpResponse response = httpclient.execute(httpget);
-        //assertEquals(200, response.getStatusLine().getStatusCode());
-        assertEquals(0, mockHandler.getHandlerCalled());
     }
 
     @Test
