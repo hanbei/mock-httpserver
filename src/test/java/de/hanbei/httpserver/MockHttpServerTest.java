@@ -55,7 +55,7 @@ public class MockHttpServerTest {
         httpServer.setTimeout(true);
         HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet("http://localhost:7001/timeout");
-        HttpResponse response = httpclient.execute(httpget);
+        httpclient.execute(httpget);
     }
 
     @Test
