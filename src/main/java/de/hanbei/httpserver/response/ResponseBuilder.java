@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+import org.apache.log4j.lf5.util.StreamUtils;
+
 /**
  * Created by IntelliJ IDEA.
  * User: hanbei
@@ -54,8 +56,8 @@ public class ResponseBuilder {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try {
             ObjectOutputStream objectOut = new ObjectOutputStream(bytes);
+            objectOut.writeObject(content);
         } catch (IOException e) {
-            // TODO throw right exception
             e.printStackTrace();
         }
         content(bytes.toByteArray());

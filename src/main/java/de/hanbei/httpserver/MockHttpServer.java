@@ -1,5 +1,20 @@
 package de.hanbei.httpserver;
 
+/* Copyright 2011 Florian Schulz
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. */
+
+
 import de.hanbei.httpserver.common.Method;
 import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.request.RequestParser;
@@ -38,6 +53,7 @@ public class MockHttpServer implements Runnable {
         timeout = false;
         waiter = new Object();
         predefinedResponses = new HashMap<Method, URIResponseMapping>();
+        defaultResponse = Response.notFound().build();
     }
 
     public void start() {
@@ -54,6 +70,9 @@ public class MockHttpServer implements Runnable {
     }
 
     public void stop() {
+    	if(!isRunning()) {
+    		return;
+    	}
         isStopping = true;
         try {
             if (this.serverSocket == null || this.serverSocket.isClosed()) {
@@ -187,8 +206,7 @@ public class MockHttpServer implements Runnable {
 
     private void sendResponse(Response response, Socket clientSocket) throws IOException {
         PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-        out.println("HTTP/" + response.getHttpVersion() + " "
-                + response.getStatus().toString());
+        out.println(response.toString());
         out.flush();
     }
 

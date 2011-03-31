@@ -57,8 +57,7 @@ public class Response {
     }
 
     public static ResponseBuilder ok() {
-        ResponseBuilder builder = new ResponseBuilder(new Response(Status.OK));
-        return builder;
+    	return status(Status.OK);
     }
 
     public static ResponseBuilder status(Status status) {
@@ -73,4 +72,8 @@ public class Response {
     public Content getContent() {
         return content;
     }
+
+	public static ResponseBuilder notFound() {
+		return status(Status.NOT_FOUND);
+	}
 }
