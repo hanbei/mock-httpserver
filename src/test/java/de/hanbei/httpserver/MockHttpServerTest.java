@@ -1,5 +1,6 @@
 package de.hanbei.httpserver;
 
+import de.hanbei.httpserver.common.Method;
 import de.hanbei.httpserver.common.Status;
 import de.hanbei.httpserver.response.Response;
 import org.apache.http.HttpResponse;
@@ -28,8 +29,8 @@ public class MockHttpServerTest {
         this.httpServer = new MockHttpServer();
         this.httpServer.setPort(7001);
         this.httpServer.start();
-        httpServer.addResponse(new URI("/test"), Response.ok().build());
-        httpServer.addResponse(new URI("/test2"), Response.status(Status.NOT_FOUND).build());
+        httpServer.addResponse(Method.GET, new URI("/test"), Response.ok().build());
+        httpServer.addResponse(Method.GET, new URI("/test2"), Response.status(Status.NOT_FOUND).build());
         assertTrue(this.httpServer.isRunning());
     }
 

@@ -1,5 +1,6 @@
 package de.hanbei.httpserver;
 
+import de.hanbei.httpserver.common.Method;
 import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.request.RequestParser;
 import de.hanbei.httpserver.response.Response;
@@ -23,7 +24,7 @@ public class MockHttpServer implements Runnable {
     private int port;
     private ServerSocket serverSocket;
 
-    private Map<URI, Response> predefinedResponses;
+    private Map<Method, URIResponseMapping> predefinedResponses;
     private Response defaultResponse;
 
     private boolean stopped;
@@ -36,7 +37,7 @@ public class MockHttpServer implements Runnable {
         this.port = 80;
         timeout = false;
         waiter = new Object();
-        predefinedResponses = new HashMap<URI, Response>();
+        predefinedResponses = new HashMap<Method, URIResponseMapping>();
     }
 
     public void start() {
@@ -160,7 +161,8 @@ public class MockHttpServer implements Runnable {
     private Response getResponse(Request request) {
         LOGGER.debug(request.toString());
         URI requestUri = request.getRequestUri();
-        Response response = predefinedResponses.get(requestUri);
+        URIResponseMapping mapping = predefinedResponses.get(request.getMethod());
+        Response response = mapping.getResponse(requestUri);
         if (response == null) {
             response = defaultResponse;
         }
@@ -198,8 +200,13 @@ public class MockHttpServer implements Runnable {
         this.defaultResponse = defaultResponse;
     }
 
-    public void addResponse(URI uri, Response response) {
-        predefinedResponses.put(uri, response);
+    public void addResponse(Method method, URI uri, Response response) {
+        URIResponseMapping mapping = predefinedResponses.get(method);
+        if (mapping == null) {
+            mapping = new URIResponseMapping();
+            predefinedResponses.put(method, mapping);
+        }
+        mapping.addResponse(uri, response);
     }
 
     public static void main(String[] args) throws IOException {
