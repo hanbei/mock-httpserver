@@ -48,6 +48,9 @@ public class MockHttpServer implements Runnable {
 
     private Object waiter;
 
+    /**
+     * Create a new MockHttpServer running on port 80.
+     */
     public MockHttpServer() {
         this.port = 80;
         timeout = false;
@@ -56,6 +59,9 @@ public class MockHttpServer implements Runnable {
         defaultResponse = Response.notFound().build();
     }
 
+    /**
+     * Start the server.
+     */
     public void start() {
         isStopping = false;
         Thread listenerThread = new Thread(this, "MockHttpServer");
@@ -69,10 +75,13 @@ public class MockHttpServer implements Runnable {
         }
     }
 
+    /**
+     * Stop the server.
+     */
     public void stop() {
-    	if(!isRunning()) {
-    		return;
-    	}
+        if (!isRunning()) {
+            return;
+        }
         isStopping = true;
         try {
             if (this.serverSocket == null || this.serverSocket.isClosed()) {
@@ -91,22 +100,47 @@ public class MockHttpServer implements Runnable {
         }
     }
 
+    /**
+     * Set if the server should timeout on requests.
+     *
+     * @param shouldTimeout true if the server should timeout, false otherwise.
+     */
     public void setTimeout(boolean shouldTimeout) {
         timeout = shouldTimeout;
     }
 
+    /**
+     * Is the server set to timeout on requests.
+     *
+     * @return True if the server is set to timeout.
+     */
     public boolean isTimeoutSet() {
         return timeout;
     }
 
+    /**
+     * Get the port the server is running on.
+     *
+     * @return The port the server is running on.
+     */
     public int getPort() {
         return this.port;
     }
 
+    /**
+     * Set the port the server should run on.
+     *
+     * @param port The port the server is running on.
+     */
     public void setPort(int port) {
         this.port = port;
     }
 
+    /**
+     * Is the server already running.
+     *
+     * @return true if the server is already running.
+     */
     public boolean isRunning() {
         if (this.serverSocket == null) {
             return !this.stopped;
@@ -114,6 +148,9 @@ public class MockHttpServer implements Runnable {
         return !this.serverSocket.isClosed();
     }
 
+    /**
+     * Implementation of the socket listening thread.
+     */
     public void run() {
         try {
             this.serverSocket = new ServerSocket(MockHttpServer.this.port);
@@ -145,7 +182,7 @@ public class MockHttpServer implements Runnable {
         }
     }
 
-    public void handle(Socket clientSocket) {
+    private void handle(Socket clientSocket) {
         try {
             Request request = readRequest(clientSocket);
             if (request == null || request.isEmpty()) {
@@ -210,14 +247,33 @@ public class MockHttpServer implements Runnable {
         out.flush();
     }
 
+    /**
+     * Get the default response the server should send on any request that is not specified via
+     * {@link MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI, de.hanbei.httpserver.response.Response)}.
+     *
+     * @return The default response.
+     * @see MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI, de.hanbei.httpserver.response.Response)
+     */
     public Response getDefaultResponse() {
         return defaultResponse;
     }
 
+    /**
+     * Set the default response for any request that has no specified response.
+     *
+     * @param defaultResponse The default response.
+     */
     public void setDefaultResponse(Response defaultResponse) {
         this.defaultResponse = defaultResponse;
     }
 
+    /**
+     * Add a specified response for a certain url and method. The uri has to be relative to the server url.
+     *
+     * @param method   The method the response should be sent on.
+     * @param uri      The uri the request will access on. Has to be relative to the server url.
+     * @param response The response that should be sent on a request on the specified uri with the specified method.
+     */
     public void addResponse(Method method, URI uri, Response response) {
         URIResponseMapping mapping = predefinedResponses.get(method);
         if (mapping == null) {
