@@ -1,6 +1,7 @@
 package de.hanbei.httpserver.request;
 
 import de.hanbei.httpserver.common.Cookie;
+import de.hanbei.httpserver.common.HTTPVersion;
 import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Method;
 import org.junit.After;
@@ -43,7 +44,7 @@ public class RequestParserTest {
 	public void testParseRequestInfo() throws URISyntaxException {
 		assertEquals(Method.GET, request.getMethod());
 		assertEquals(new URI("/test/uri/"), request.getRequestUri());
-		assertEquals("1.1", request.getVersion());
+		assertEquals(HTTPVersion.VERSION1_1, request.getVersion());
 		assertEquals(new URI("localhost:8079"), request.getHost());
 		assertNotNull(request.getHeader());
 	}

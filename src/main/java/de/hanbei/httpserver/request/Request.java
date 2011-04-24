@@ -1,6 +1,7 @@
 package de.hanbei.httpserver.request;
 
 import de.hanbei.httpserver.common.Content;
+import de.hanbei.httpserver.common.HTTPVersion;
 import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Method;
 
@@ -12,7 +13,7 @@ public class Request {
 
     private URI requestUri;
 
-    private String version;
+    private HTTPVersion version;
 
     private URI host;
 
@@ -41,11 +42,11 @@ public class Request {
         this.requestUri = requestUri;
     }
 
-    public void setVersion(String httpVersion) {
+    public void setVersion(HTTPVersion httpVersion) {
         this.version = httpVersion;
     }
 
-    public String getVersion() {
+    public HTTPVersion getVersion() {
         return this.version;
     }
 

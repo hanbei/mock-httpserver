@@ -67,7 +67,7 @@ public class RequestParser {
         request.setRequestUri(new URI(tokenizer.nextToken()));
 
         String httpVersionString = tokenizer.nextToken();
-        request.setVersion(httpVersionString.substring(httpVersionString.indexOf("/") + 1));
+        request.setVersion(HTTPVersion.parseString(httpVersionString.substring(httpVersionString.indexOf("/") + 1)));
     }
 
     private void parseHost(ByteArrayInputStream in, Request request) throws IOException, URISyntaxException {

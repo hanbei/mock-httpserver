@@ -1,16 +1,17 @@
 package de.hanbei.httpserver.response;
 
 import de.hanbei.httpserver.common.Content;
+import de.hanbei.httpserver.common.HTTPVersion;
 import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Status;
 
 /**
- * Created by IntelliJ IDEA. User: hanbei Date: 26.02.11 Time: 12:39 To change
- * this template use File | Settings | File Templates.
+ * A HTTP response. Instances of this class can be build by calling the static creation methods and using the
+ * {@link ResponseBuilder} class.
  */
 public class Response {
 
-    private String httpVersion = "1.1";
+    private HTTPVersion httpVersion = HTTPVersion.VERSION1_1;
 
     private Status status;
 
@@ -18,28 +19,44 @@ public class Response {
 
     private Content content;
 
-    public Response() {
+    private Response() {
     }
 
-    public Response(Status status) {
+    private Response(Status status) {
         this.status = status;
         header = new Header();
         content = new Content();
     }
 
+    /**
+     * Get the status code of this response.
+     * @return The status code of this response.
+     */
     public Status getStatus() {
         return status;
     }
 
+    /**
+     * Set the status code of this response.
+     * @param status The status code of this response.
+     */
     void setStatus(Status status) {
         this.status = status;
     }
 
-    public String getHttpVersion() {
+    /**
+     * Get the used HTTP version for this response. Defaults to 1.1
+     * @return The used HTTP version.
+     */
+    public HTTPVersion getHttpVersion() {
         return httpVersion;
     }
 
-    void setHttpVersion(String httpVersion) {
+    /**
+     * Set the HTTP Version of this response.
+     * @param httpVersion
+     */
+    void setHttpVersion(HTTPVersion httpVersion) {
         this.httpVersion = httpVersion;
     }
 
@@ -56,24 +73,32 @@ public class Response {
         return builder.toString();
     }
 
+    /**
+     * Get the header fields of this response and set them.
+     * @return The header fields of this response.
+     */
+    public Header getHeader() {
+        return header;
+    }
+
+    /**
+     * Get the content that will be sent with this response.
+     * @return The content of this response.
+     */
+    public Content getContent() {
+        return content;
+    }
+
+    public static ResponseBuilder notFound() {
+        return status(Status.NOT_FOUND);
+    }
+
     public static ResponseBuilder ok() {
-    	return status(Status.OK);
+        return status(Status.OK);
     }
 
     public static ResponseBuilder status(Status status) {
         ResponseBuilder builder = new ResponseBuilder(new Response(status));
         return builder;
     }
-
-    public Header getHeader() {
-        return header;
-    }
-
-    public Content getContent() {
-        return content;
-    }
-
-	public static ResponseBuilder notFound() {
-		return status(Status.NOT_FOUND);
-	}
 }

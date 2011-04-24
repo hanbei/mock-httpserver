@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import de.hanbei.httpserver.common.Constants;
+import de.hanbei.httpserver.common.HTTPVersion;
 import de.hanbei.httpserver.common.Status;
 
 /**
@@ -41,7 +42,7 @@ public class ResponseBuilder {
 		return this;
 	}
 
-	public ResponseBuilder version(String version) {
+	public ResponseBuilder version(HTTPVersion version) {
 		response.setHttpVersion(version);
 		return this;
 	}
