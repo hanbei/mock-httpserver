@@ -29,17 +29,17 @@ import java.util.Map;
  */
 class URIResponseMapping {
 
-    private Map<URI, Response> responses;
+    private Map<String, Response> responses;
 
     public URIResponseMapping() {
-        responses = new HashMap<URI, Response>();
+        responses = new HashMap<String, Response>();
     }
 
-    public Response getResponse(URI requestUri) {
+    public Response getResponse(String requestUri) {
         return responses.get(requestUri);
     }
 
-    public void addResponse(URI uri, Response response) {
+    public void addResponse(String uri, Response response) {
         responses.put(uri, response);
     }
 }

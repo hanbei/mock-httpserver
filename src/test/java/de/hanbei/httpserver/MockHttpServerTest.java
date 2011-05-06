@@ -23,6 +23,7 @@ import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +39,7 @@ import static org.junit.Assert.assertTrue;
 public class MockHttpServerTest {
 
     private MockHttpServer httpServer;
+    private HttpClient httpclient;
 
     @Before
     public void setUp() throws Exception {
@@ -48,19 +50,32 @@ public class MockHttpServerTest {
         httpServer.addResponse(Method.GET, new URI("/test3"), Response.ok().content("TestContent").build());
         httpServer.addResponse(Method.GET, new URI("/test2"), Response.status(Status.NOT_FOUND).build());
         assertTrue(this.httpServer.isRunning());
+
+        httpclient = new DefaultHttpClient(new ThreadSafeClientConnManager());
     }
 
     @Test
     public void testCall() throws IOException {
-        HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet("http://localhost:7001/test");
         HttpResponse response = httpclient.execute(httpget);
         assertEquals(200, response.getStatusLine().getStatusCode());
     }
 
     @Test
+    public void testTrailingSlashIsTheSameAsWithout() throws IOException {
+        HttpGet httpget = new HttpGet("http://localhost:7001/test");
+        HttpResponse response = httpclient.execute(httpget);
+        assertEquals("non trailing slash broken", 200, response.getStatusLine().getStatusCode());
+        byte[] content = new byte[2];
+        response.getEntity().getContent().read(content);
+
+        HttpGet httpget2 = new HttpGet("http://localhost:7001/test/");
+        HttpResponse response2 = httpclient.execute(httpget2);
+        assertEquals("Trailing slash broken", 200, response2.getStatusLine().getStatusCode());
+    }
+
+    @Test
     public void testCall2() throws IOException {
-        HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet("http://localhost:7001/test2");
         HttpResponse response = httpclient.execute(httpget);
         assertEquals(404, response.getStatusLine().getStatusCode());
@@ -68,7 +83,6 @@ public class MockHttpServerTest {
 
     @Test
     public void getContent() throws IOException {
-        HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet("http://localhost:7001/test3");
         HttpResponse response = httpclient.execute(httpget);
         assertEquals(200, response.getStatusLine().getStatusCode());
