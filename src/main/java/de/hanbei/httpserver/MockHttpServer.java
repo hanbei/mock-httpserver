@@ -217,7 +217,7 @@ public class MockHttpServer implements Runnable {
 
     private Response getResponse(Request request) {
         LOGGER.debug(request.toString());
-        String requestUri = removeTrailingSlash(request.getRequestUri());
+        String requestUri = trimSlashes(request.getRequestUri());
         URIResponseMapping mapping = predefinedResponses.get(request.getMethod());
         Response response = mapping.getResponse(requestUri);
         if (response == null) {
@@ -283,15 +283,12 @@ public class MockHttpServer implements Runnable {
             mapping = new URIResponseMapping();
             predefinedResponses.put(method, mapping);
         }
-        mapping.addResponse(removeTrailingSlash(uri), response);
+        mapping.addResponse(trimSlashes(uri), response);
     }
 
-    private String removeTrailingSlash(URI uri) {
+    private String trimSlashes(URI uri) {
         String uriString = uri.toString();
-        if (uriString.endsWith("/")) {
-            uriString = uriString.substring(0, uriString.length() - 1);
-        }
-        return uriString;
+        return uriString.replaceAll("^/|/$","");
     }
 
     public static void main(String[] args) throws IOException {
