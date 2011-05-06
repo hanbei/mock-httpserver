@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -48,9 +49,7 @@ public class MockHttpServer implements Runnable {
 
     private Object waiter;
 
-    /**
-     * Create a new MockHttpServer running on port 80.
-     */
+    /** Create a new MockHttpServer running on port 80. */
     public MockHttpServer() {
         this.port = 80;
         timeout = false;
@@ -59,9 +58,7 @@ public class MockHttpServer implements Runnable {
         defaultResponse = Response.notFound().build();
     }
 
-    /**
-     * Start the server.
-     */
+    /** Start the server. */
     public void start() {
         isStopping = false;
         Thread listenerThread = new Thread(this, "MockHttpServer");
@@ -75,9 +72,7 @@ public class MockHttpServer implements Runnable {
         }
     }
 
-    /**
-     * Stop the server.
-     */
+    /** Stop the server. */
     public void stop() {
         if (!isRunning()) {
             return;
@@ -92,6 +87,14 @@ public class MockHttpServer implements Runnable {
             socket.close();
             synchronized (waiter) {
                 waiter.wait();
+            }
+
+        } catch (ConnectException e) {
+            try {
+                LOGGER.info("Could not send close request. But server socket is not waiting, just closing it.");
+                serverSocket.close();
+            } catch (IOException e1) {
+                LOGGER.error("Error while stopping server", e);
             }
         } catch (IOException e) {
             LOGGER.warn("Error while stopping server", e);
@@ -148,9 +151,7 @@ public class MockHttpServer implements Runnable {
         return !this.serverSocket.isClosed();
     }
 
-    /**
-     * Implementation of the socket listening thread.
-     */
+    /** Implementation of the socket listening thread. */
     public void run() {
         try {
             this.serverSocket = new ServerSocket(MockHttpServer.this.port);
@@ -216,7 +217,7 @@ public class MockHttpServer implements Runnable {
 
     private Response getResponse(Request request) {
         LOGGER.debug(request.toString());
-        URI requestUri = request.getRequestUri();
+        String requestUri = removeTrailingSlash(request.getRequestUri());
         URIResponseMapping mapping = predefinedResponses.get(request.getMethod());
         Response response = mapping.getResponse(requestUri);
         if (response == null) {
@@ -248,11 +249,13 @@ public class MockHttpServer implements Runnable {
     }
 
     /**
-     * Get the default response the server should send on any request that is not specified via
-     * {@link MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI, de.hanbei.httpserver.response.Response)}.
+     * Get the default response the server should send on any request that is not specified via {@link
+     * MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI,
+     * de.hanbei.httpserver.response.Response)}.
      *
      * @return The default response.
-     * @see MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI, de.hanbei.httpserver.response.Response)
+     * @see MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI,
+     *      de.hanbei.httpserver.response.Response)
      */
     public Response getDefaultResponse() {
         return defaultResponse;
@@ -280,7 +283,15 @@ public class MockHttpServer implements Runnable {
             mapping = new URIResponseMapping();
             predefinedResponses.put(method, mapping);
         }
-        mapping.addResponse(uri, response);
+        mapping.addResponse(removeTrailingSlash(uri), response);
+    }
+
+    private String removeTrailingSlash(URI uri) {
+        String uriString = uri.toString();
+        if (uriString.endsWith("/")) {
+            uriString = uriString.substring(0, uriString.length() - 1);
+        }
+        return uriString;
     }
 
     public static void main(String[] args) throws IOException {
