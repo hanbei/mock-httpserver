@@ -3,11 +3,8 @@ package de.hanbei.httpserver.common;
 import java.net.URI;
 
 /**
- * Created by IntelliJ IDEA.
- * User: hanbei
- * Date: 27.02.11
- * Time: 14:48
- * To change this template use File | Settings | File Templates.
+ * A class to save the content send with a request or a response. Holds all necessary information of content i.e.
+ * content length, mimetype, encoding and the actual content as byte array.
  */
 public class Content {
 

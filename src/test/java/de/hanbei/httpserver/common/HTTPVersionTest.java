@@ -1,24 +1,11 @@
 package de.hanbei.httpserver.common;
 
-import org.apache.http.protocol.HTTP;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/**
- * Created by IntelliJ IDEA.
- * User: hanbei
- * Date: 24.04.11
- * Time: 13:31
- * To change this template use File | Settings | File Templates.
- */
 public class HTTPVersionTest {
 
-    @Before
-    public void setup() {
-
-    }
 
     @Test
     public void testToString() {

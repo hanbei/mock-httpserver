@@ -1,11 +1,7 @@
 package de.hanbei.httpserver.common;
 
 /**
- * Created by IntelliJ IDEA.
- * User: hanbei
- * Date: 26.02.11
- * Time: 12:39
- * To change this template use File | Settings | File Templates.
+ * Contains all known HTTP status.
  */
 public class Status {
 
@@ -70,14 +66,14 @@ public class Status {
         this.statusCode = statusCode;
     }
 
-	public String getReason() {
-		return reasonPhrase;
-	}
+    public String getReason() {
+        return reasonPhrase;
+    }
 
-	@Override
-	public String toString() {
-		return statusCode + " " + reasonPhrase;
-	}
+    @Override
+    public String toString() {
+        return statusCode + " " + reasonPhrase;
+    }
 
 
     @Override
@@ -88,14 +84,21 @@ public class Status {
         Status status = (Status) o;
 
         if (statusCode != status.statusCode) return false;
-        if (reasonPhrase != null ? !reasonPhrase.equals(status.reasonPhrase) : status.reasonPhrase != null)
-            return false;
-
+        if (reasonPhrase != null) {
+            if (!reasonPhrase.equals(status.reasonPhrase)) {
+                return false;
+            }
+        } else {
+            if (status.reasonPhrase != null) {
+                return false;
+            }
+        }
         return true;
     }
 
     @Override
-    public int hashCode() {
+    public int hashCode
+            () {
         int result = statusCode;
         result = 31 * result + (reasonPhrase != null ? reasonPhrase.hashCode() : 0);
         return result;

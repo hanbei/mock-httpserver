@@ -125,8 +125,4 @@ public class RequestParserTest {
 		assertEquals(0.7, header.getAcceptCharsetQuality("*"), 0.00000001);
 	}
 
-	@After
-	public void tearDown() throws Exception {
-	}
-
 }

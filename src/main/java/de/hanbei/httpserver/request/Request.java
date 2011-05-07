@@ -87,6 +87,11 @@ public class Request {
         this.content = content;
     }
 
+    /**
+     * is the request empty i.e. method, http version and request uri are null. (Used for internal purpose).
+     *
+     * @return true if method, http version and request uri are null.
+     */
     public boolean isEmpty() {
         return (method == null) && (version == null) && (requestUri == null);
     }

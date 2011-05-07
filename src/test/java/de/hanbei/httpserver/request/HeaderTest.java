@@ -1,7 +1,6 @@
 package de.hanbei.httpserver.request;
 
 import de.hanbei.httpserver.common.Header;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,10 +33,6 @@ public class HeaderTest {
                 "Accept-Language: en;q=0.1,en-us;q=0.5\n" +
                 "Accept-Encoding: gzip,deflate\n" +
                 "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\n", this.header.toString());
-    }
-
-    @After
-    public void tearDown() throws Exception {
     }
 
 }

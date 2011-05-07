@@ -1,24 +1,29 @@
 package de.hanbei.httpserver.common;
 
 /**
- * Created by IntelliJ IDEA.
- * User: hanbei
- * Date: 27.02.11
- * Time: 14:03
- * To change this template use File | Settings | File Templates.
+ * Represents a cookie in a response and a request. Cookies have a name and a value.
  */
 public class Cookie {
 
     private String name;
     private String value;
 
+    /**
+     * Create a cookie with a name and a value set.
+     *
+     * @param name  The name of the cookie.
+     * @param value The value of the cookie.
+     */
     public Cookie(String name, String value) {
         this.name = name;
         this.value = value;
     }
 
+    /**
+     * Create a empty cookie.
+     */
     public Cookie() {
-        this("","");
+        this("", "");
 
     }
 
@@ -45,8 +50,24 @@ public class Cookie {
 
         Cookie cookie = (Cookie) o;
 
-        if (name != null ? !name.equals(cookie.name) : cookie.name != null) return false;
-        if (value != null ? !value.equals(cookie.value) : cookie.value != null) return false;
+        if (name != null) {
+            if (!name.equals(cookie.name)) {
+                return false;
+            }
+        } else {
+            if (cookie.name != null) {
+                return false;
+            }
+        }
+        if (value != null) {
+            if (!value.equals(cookie.value)) {
+                return false;
+            }
+        } else {
+            if (cookie.value != null) {
+                return false;
+            }
+        }
 
         return true;
     }

@@ -111,7 +111,8 @@ public class Header {
         if (acceptMap.isEmpty()) {
             return;
         }
-        buffer.append(parameterName + ": ");
+        buffer.append(parameterName);
+        buffer.append(": ");
         int counter = 1;
         for (String value : acceptMap.keySet()) {
             buffer.append(value);
@@ -145,7 +146,7 @@ public class Header {
 
     private double getQualityParameter(Map<String, Double> acceptParameter, String key) {
         Double quality = acceptParameter.get(key);
-        return quality != null ? quality.doubleValue() : -1.0;
+        return quality != null ? quality : -1.0;
     }
 
     public void addCookie(Cookie cookie) {

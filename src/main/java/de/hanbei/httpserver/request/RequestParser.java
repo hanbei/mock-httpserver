@@ -1,6 +1,11 @@
 package de.hanbei.httpserver.request;
 
-import de.hanbei.httpserver.common.*;
+import de.hanbei.httpserver.common.Constants;
+import de.hanbei.httpserver.common.Content;
+import de.hanbei.httpserver.common.Cookie;
+import de.hanbei.httpserver.common.HTTPVersion;
+import de.hanbei.httpserver.common.Header;
+import de.hanbei.httpserver.common.Method;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,12 +17,16 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.StringTokenizer;
 
+/**
+ * Parses a request from an inputstream and returns a {@link Request} object.
+ */
 public class RequestParser {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RequestParser.class);
 
     private static class QualityParameter {
+
         public String value;
         public double quality;
 
@@ -28,12 +37,11 @@ public class RequestParser {
     }
 
     public Request parse(InputStream in) {
-        //BufferedReader reader = new BufferedReader(in);
         Request request = new Request();
         ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
         byte[] buffer = new byte[1024];
         try {
-            int bytesRead = 0;
+            int bytesRead;
             while (in.available() > 0 && (bytesRead = in.read(buffer)) != -1) {
                 bytesOut.write(buffer, 0, bytesRead);
             }
@@ -122,7 +130,7 @@ public class RequestParser {
                 StringTokenizer tokenizer = new StringTokenizer(line, ":;");
                 String contentString = tokenizer.nextToken();
                 if (Constants.CONTENT_TYPE.equals(contentString)) {
-
+                        // why is this empty.
                 } else if (Constants.CONTENT_LENGTH.equals(contentString)) {
                     String contentLengthString = tokenizer.nextToken().trim();
                     int contentLength = Integer.parseInt(contentLengthString);
@@ -133,13 +141,16 @@ public class RequestParser {
                 if (content.getLength() < 0) {
                     break;
                 }
-                    byte[] buffer2 = new byte[content.getLength()];
-                    if (in.available() > 0) {
-                        in.read(buffer2);
-                        content.setContent(buffer2);
-                    } else {
-                        break;
+                byte[] contentBytes = new byte[content.getLength()];
+                if (in.available() > 0) {
+                    int readBytes = in.read(contentBytes);
+                    if(readBytes != contentBytes.length) {
+
                     }
+                    content.setContent(contentBytes);
+                } else {
+                    break;
+                }
             } else {
                 StringTokenizer tokenizer = new StringTokenizer(line, " :");
                 header.addParameter(tokenizer.nextToken().trim(), tokenizer.nextToken().trim());
@@ -167,9 +178,11 @@ public class RequestParser {
     private int last = -1; // The last char we've read
 
     /**
-     * Read a line of data from the underlying inputstream
+     * Read a line of data from the underlying inputstream and save it in the StringBuffer <code>sb</code>.
      *
-     * @return a line stripped of line terminators
+     * @param in The input stream to read from.
+     * @param sb The StringBuffer to save the read line from the inputstream.
+     * @throws java.io.IOException Throws an IOException if the inputstream fails.
      */
     private void readLine(InputStream in, StringBuffer sb) throws IOException {
         sb.delete(0, sb.length());

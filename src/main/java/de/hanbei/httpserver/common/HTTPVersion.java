@@ -1,11 +1,7 @@
 package de.hanbei.httpserver.common;
 
 /**
- * Created by IntelliJ IDEA.
- * User: hanbei
- * Date: 24.04.11
- * Time: 13:21
- * To change this template use File | Settings | File Templates.
+ * Enum to represent HTTP Versions.
  */
 public enum HTTPVersion {
 

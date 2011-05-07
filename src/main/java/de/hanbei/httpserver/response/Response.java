@@ -30,6 +30,7 @@ public class Response {
 
     /**
      * Get the status code of this response.
+     *
      * @return The status code of this response.
      */
     public Status getStatus() {
@@ -38,6 +39,7 @@ public class Response {
 
     /**
      * Set the status code of this response.
+     *
      * @param status The status code of this response.
      */
     void setStatus(Status status) {
@@ -46,6 +48,7 @@ public class Response {
 
     /**
      * Get the used HTTP version for this response. Defaults to 1.1
+     *
      * @return The used HTTP version.
      */
     public HTTPVersion getHttpVersion() {
@@ -54,7 +57,8 @@ public class Response {
 
     /**
      * Set the HTTP Version of this response.
-     * @param httpVersion
+     *
+     * @param httpVersion The version of the HTTP Protocol.
      */
     void setHttpVersion(HTTPVersion httpVersion) {
         this.httpVersion = httpVersion;
@@ -75,6 +79,7 @@ public class Response {
 
     /**
      * Get the header fields of this response and set them.
+     *
      * @return The header fields of this response.
      */
     public Header getHeader() {
@@ -83,22 +88,41 @@ public class Response {
 
     /**
      * Get the content that will be sent with this response.
+     *
      * @return The content of this response.
      */
     public Content getContent() {
         return content;
     }
 
+    /**
+     * Create a response that represents a 404 Not Found. Additional information can be set via the returned
+     * {@link ResponseBuilder} class.
+     *
+     * @return A ResponseBuilder with a base response initialized on 404 - Not Found.
+     */
     public static ResponseBuilder notFound() {
         return status(Status.NOT_FOUND);
     }
 
+    /**
+     * Create a response that represents a 200 - Ok. Additional information can be set via the returned
+     * {@link ResponseBuilder} class.
+     *
+     * @return A ResponseBuilder with a base response initialized on 200 - Ok.
+     */
     public static ResponseBuilder ok() {
         return status(Status.OK);
     }
 
+
+    /**
+     * Create a response that represents some status. Additional information can be set via the returned
+     * {@link ResponseBuilder} class.
+     *
+     * @return A ResponseBuilder with a base response initialized on <code>status</code>.
+     */
     public static ResponseBuilder status(Status status) {
-        ResponseBuilder builder = new ResponseBuilder(new Response(status));
-        return builder;
+        return new ResponseBuilder(new Response(status));
     }
 }

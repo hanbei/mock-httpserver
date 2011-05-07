@@ -47,9 +47,11 @@ public class MockHttpServer implements Runnable {
     private boolean isStopping;
     private boolean timeout;
 
-    private Object waiter;
+    private final Object waiter;
 
-    /** Create a new MockHttpServer running on port 80. */
+    /**
+     * Create a new MockHttpServer running on port 80.
+     */
     public MockHttpServer() {
         this.port = 80;
         timeout = false;
@@ -58,7 +60,9 @@ public class MockHttpServer implements Runnable {
         defaultResponse = Response.notFound().build();
     }
 
-    /** Start the server. */
+    /**
+     * Start the server.
+     */
     public void start() {
         isStopping = false;
         Thread listenerThread = new Thread(this, "MockHttpServer");
@@ -72,7 +76,9 @@ public class MockHttpServer implements Runnable {
         }
     }
 
-    /** Stop the server. */
+    /**
+     * Stop the server.
+     */
     public void stop() {
         if (!isRunning()) {
             return;
@@ -151,7 +157,9 @@ public class MockHttpServer implements Runnable {
         return !this.serverSocket.isClosed();
     }
 
-    /** Implementation of the socket listening thread. */
+    /**
+     * Implementation of the socket listening thread.
+     */
     public void run() {
         try {
             this.serverSocket = new ServerSocket(MockHttpServer.this.port);
@@ -237,9 +245,7 @@ public class MockHttpServer implements Runnable {
         }
         RequestParser requestParser = new RequestParser();
         clientSocket.getInputStream();
-        Request request = null;
-        request = requestParser.parse(clientSocket.getInputStream());
-        return request;
+        return requestParser.parse(clientSocket.getInputStream());
     }
 
     private void sendResponse(Response response, Socket clientSocket) throws IOException {
@@ -288,7 +294,7 @@ public class MockHttpServer implements Runnable {
 
     private String trimSlashes(URI uri) {
         String uriString = uri.toString();
-        return uriString.replaceAll("^/|/$","");
+        return uriString.replaceAll("^/|/$", "");
     }
 
     public static void main(String[] args) throws IOException {

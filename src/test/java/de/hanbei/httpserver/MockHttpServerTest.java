@@ -66,8 +66,6 @@ public class MockHttpServerTest {
         HttpGet httpget = new HttpGet("http://localhost:7001/test");
         HttpResponse response = httpclient.execute(httpget);
         assertEquals("non trailing slash broken", 200, response.getStatusLine().getStatusCode());
-        byte[] content = new byte[2];
-        response.getEntity().getContent().read(content);
 
         HttpGet httpget2 = new HttpGet("http://localhost:7001/test/");
         HttpResponse response2 = httpclient.execute(httpget2);
