@@ -1,8 +1,20 @@
+/* Copyright 2011 Florian Schulz
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. */
+
 package de.hanbei.httpserver.common;
 
-/**
- * Represents a cookie in a response and a request. Cookies have a name and a value.
- */
+/** Represents a cookie in a response and a request. Cookies have a name and a value. */
 public class Cookie {
 
     private String name;
@@ -19,9 +31,7 @@ public class Cookie {
         this.value = value;
     }
 
-    /**
-     * Create a empty cookie.
-     */
+    /** Create a empty cookie. */
     public Cookie() {
         this("", "");
 
@@ -45,8 +55,12 @@ public class Cookie {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Cookie)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Cookie)) {
+            return false;
+        }
 
         Cookie cookie = (Cookie) o;
 

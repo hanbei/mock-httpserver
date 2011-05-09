@@ -1,3 +1,17 @@
+/* Copyright 2011 Florian Schulz
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. */
+
 package de.hanbei.httpserver.response;
 
 import de.hanbei.httpserver.common.Content;
@@ -6,8 +20,8 @@ import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Status;
 
 /**
- * A HTTP response. Instances of this class can be build by calling the static creation methods and using the
- * {@link ResponseBuilder} class.
+ * A HTTP response. Instances of this class can be build by calling the static creation methods and using the {@link
+ * ResponseBuilder} class.
  */
 public class Response {
 
@@ -96,8 +110,8 @@ public class Response {
     }
 
     /**
-     * Create a response that represents a 404 Not Found. Additional information can be set via the returned
-     * {@link ResponseBuilder} class.
+     * Create a response that represents a 404 Not Found. Additional information can be set via the returned {@link
+     * ResponseBuilder} class.
      *
      * @return A ResponseBuilder with a base response initialized on 404 - Not Found.
      */
@@ -106,8 +120,8 @@ public class Response {
     }
 
     /**
-     * Create a response that represents a 200 - Ok. Additional information can be set via the returned
-     * {@link ResponseBuilder} class.
+     * Create a response that represents a 200 - Ok. Additional information can be set via the returned {@link
+     * ResponseBuilder} class.
      *
      * @return A ResponseBuilder with a base response initialized on 200 - Ok.
      */
@@ -117,8 +131,8 @@ public class Response {
 
 
     /**
-     * Create a response that represents some status. Additional information can be set via the returned
-     * {@link ResponseBuilder} class.
+     * Create a response that represents some status. Additional information can be set via the returned {@link
+     * ResponseBuilder} class.
      *
      * @return A ResponseBuilder with a base response initialized on <code>status</code>.
      */

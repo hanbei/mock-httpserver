@@ -1,3 +1,16 @@
+/* Copyright 2011 Florian Schulz
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. */
 package de.hanbei.httpserver.request;
 
 import de.hanbei.httpserver.common.Constants;
@@ -17,9 +30,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.StringTokenizer;
 
-/**
- * Parses a request from an inputstream and returns a {@link Request} object.
- */
+/** Parses a request from an inputstream and returns a {@link Request} object. */
 public class RequestParser {
 
 
@@ -130,7 +141,7 @@ public class RequestParser {
                 StringTokenizer tokenizer = new StringTokenizer(line, ":;");
                 String contentString = tokenizer.nextToken();
                 if (Constants.CONTENT_TYPE.equals(contentString)) {
-                        // why is this empty.
+                    // why is this empty.
                 } else if (Constants.CONTENT_LENGTH.equals(contentString)) {
                     String contentLengthString = tokenizer.nextToken().trim();
                     int contentLength = Integer.parseInt(contentLengthString);
@@ -144,7 +155,7 @@ public class RequestParser {
                 byte[] contentBytes = new byte[content.getLength()];
                 if (in.available() > 0) {
                     int readBytes = in.read(contentBytes);
-                    if(readBytes != contentBytes.length) {
+                    if (readBytes != contentBytes.length) {
 
                     }
                     content.setContent(contentBytes);
@@ -188,7 +199,9 @@ public class RequestParser {
         sb.delete(0, sb.length());
         int ch = -1;   // currently read char
 
-        if (last != -1) sb.append((char) last);
+        if (last != -1) {
+            sb.append((char) last);
+        }
         ch = in.read();
         if (ch == -1) {
             return;

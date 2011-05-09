@@ -1,5 +1,3 @@
-package de.hanbei.httpserver;
-
 /* Copyright 2011 Florian Schulz
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +11,7 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
+package de.hanbei.httpserver;
 
 
 import de.hanbei.httpserver.common.Method;
@@ -49,9 +48,7 @@ public class MockHttpServer implements Runnable {
 
     private final Object waiter;
 
-    /**
-     * Create a new MockHttpServer running on port 80.
-     */
+    /** Create a new MockHttpServer running on port 80. */
     public MockHttpServer() {
         this.port = 80;
         timeout = false;
@@ -60,9 +57,7 @@ public class MockHttpServer implements Runnable {
         defaultResponse = Response.notFound().build();
     }
 
-    /**
-     * Start the server.
-     */
+    /** Start the server. */
     public void start() {
         isStopping = false;
         Thread listenerThread = new Thread(this, "MockHttpServer");
@@ -76,9 +71,7 @@ public class MockHttpServer implements Runnable {
         }
     }
 
-    /**
-     * Stop the server.
-     */
+    /** Stop the server. */
     public void stop() {
         if (!isRunning()) {
             return;
@@ -157,9 +150,7 @@ public class MockHttpServer implements Runnable {
         return !this.serverSocket.isClosed();
     }
 
-    /**
-     * Implementation of the socket listening thread.
-     */
+    /** Implementation of the socket listening thread. */
     public void run() {
         try {
             this.serverSocket = new ServerSocket(MockHttpServer.this.port);
