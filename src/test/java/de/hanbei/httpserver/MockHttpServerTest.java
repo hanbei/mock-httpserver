@@ -43,8 +43,7 @@ public class MockHttpServerTest {
 
     @Before
     public void setUp() throws Exception {
-        this.httpServer = new MockHttpServer();
-        this.httpServer.setPort(7001);
+        this.httpServer = new MockHttpServer(7001);
         this.httpServer.start();
         httpServer.addResponse(Method.GET, new URI("/test"), Response.ok().build());
         httpServer.addResponse(Method.GET, new URI("/test3"), Response.ok().content("TestContent").build());

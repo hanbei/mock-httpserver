@@ -48,9 +48,13 @@ public class MockHttpServer implements Runnable {
 
     private final Object waiter;
 
-    /** Create a new MockHttpServer running on port 80. */
     public MockHttpServer() {
-        this.port = 80;
+        this(80);
+    }
+
+    /** Create a new MockHttpServer running on port 80. */
+    public MockHttpServer(int port) {
+        this.port = port;
         timeout = false;
         waiter = new Object();
         predefinedResponses = new HashMap<Method, URIResponseMapping>();
