@@ -46,7 +46,9 @@ public class MockHttpServer implements Runnable {
     private boolean isStopping;
     private boolean timeout;
 
-    private final Object waiter;
+    private final Object lock;
+
+    private long startTimeout = 2000;
 
     public MockHttpServer() {
         this(80);
@@ -56,7 +58,7 @@ public class MockHttpServer implements Runnable {
     public MockHttpServer(int port) {
         this.port = port;
         timeout = false;
-        waiter = new Object();
+        lock = new Object();
         predefinedResponses = new HashMap<Method, URIResponseMapping>();
         defaultResponse = Response.notFound().build();
     }
@@ -65,11 +67,12 @@ public class MockHttpServer implements Runnable {
     public void start() {
         isStopping = false;
         Thread listenerThread = new Thread(this, "MockHttpServer");
-        listenerThread.start();
-        synchronized (waiter) {
+        synchronized (lock) {
+            listenerThread.start();
             try {
-                waiter.wait();
+                lock.wait(startTimeout);
             } catch (InterruptedException e) {
+                stop();
                 LOGGER.error("Error during startup", e);
             }
         }
@@ -88,8 +91,8 @@ public class MockHttpServer implements Runnable {
             InetAddress serverAddress = this.serverSocket.getInetAddress();
             Socket socket = new Socket(serverAddress, this.port);
             socket.close();
-            synchronized (waiter) {
-                waiter.wait();
+            synchronized (lock) {
+                lock.wait();
             }
 
         } catch (ConnectException e) {
@@ -162,8 +165,8 @@ public class MockHttpServer implements Runnable {
                     MockHttpServer.this.serverSocket.getInetAddress(),
                     MockHttpServer.this.serverSocket.getLocalPort());
             this.stopped = false;
-            synchronized (waiter) {
-                waiter.notifyAll();
+            synchronized (lock) {
+                lock.notifyAll();
             }
             while (!MockHttpServer.this.isStopping) {
                 Socket clientSocket = MockHttpServer.this.serverSocket.accept();
@@ -180,8 +183,8 @@ public class MockHttpServer implements Runnable {
                 LOGGER.error("Error while closing socket", e);
             }
             this.stopped = true;
-            synchronized (waiter) {
-                waiter.notifyAll();
+            synchronized (lock) {
+                lock.notifyAll();
             }
         }
     }
@@ -231,9 +234,9 @@ public class MockHttpServer implements Runnable {
     }
 
     private Request readRequest(Socket clientSocket) throws IOException {
-        synchronized (waiter) {
+        synchronized (lock) {
             try {
-                waiter.wait(100);
+                lock.wait(100);
             } catch (InterruptedException e) {
                 return null;
             }
@@ -269,6 +272,24 @@ public class MockHttpServer implements Runnable {
      */
     public void setDefaultResponse(Response defaultResponse) {
         this.defaultResponse = defaultResponse;
+    }
+
+    /**
+     * Get the maximum time the server is allowed to take for startup.
+     *
+     * @return The maximum time the server is allowed to take for startup.
+     */
+    public long getStartTimeout() {
+        return startTimeout;
+    }
+
+    /**
+     * Set the maximum time the server is allowed to take for startup.
+     *
+     * @param startTimeout The maximum time the server is allowed to take for startup.
+     */
+    public void setStartTimeout(long startTimeout) {
+        this.startTimeout = startTimeout;
     }
 
     /**
