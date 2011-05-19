@@ -92,6 +92,18 @@ public class MockHttpServerTest {
     }
 
     @Test
+    public void testDefaultResponse() throws IOException {
+        HttpGet httpget = new HttpGet("http://localhost:7001/something");
+        HttpResponse response = httpclient.execute(httpget);
+        assertEquals(404, response.getStatusLine().getStatusCode());
+
+        httpServer.setDefaultResponse(Response.status(Status.INTERNAL_SERVER_ERROR).build());
+        HttpGet httpget2 = new HttpGet("http://localhost:7001/default");
+        HttpResponse response2 = httpclient.execute(httpget2);
+        assertEquals(500, response2.getStatusLine().getStatusCode());
+    }
+
+    @Test
     public void testIsRunning() {
         this.httpServer.stop();
         assertFalse(this.httpServer.isRunning());

@@ -225,9 +225,12 @@ public class MockHttpServer implements Runnable {
         LOGGER.debug(request.toString());
         String requestUri = trimSlashes(request.getRequestUri());
         URIResponseMapping mapping = predefinedResponses.get(request.getMethod());
+        if (mapping == null) {
+            return defaultResponse;
+        }
         Response response = mapping.getResponse(requestUri);
         if (response == null) {
-            response = defaultResponse;
+            return defaultResponse;
         }
         LOGGER.debug(response.toString());
         return response;
