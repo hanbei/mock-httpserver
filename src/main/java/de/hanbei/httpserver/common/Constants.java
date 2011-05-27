@@ -42,6 +42,7 @@ public class Constants {
     public static final String TRANSFER_ENCODING = "Transfer-Encoding";
     public static final String USER_AGENT = "User-Agent";
     public static final String WARNING = "Warning";
+	public static final String CONTENT = "Content";
 
     private Constants() {
         // construction not allowed
