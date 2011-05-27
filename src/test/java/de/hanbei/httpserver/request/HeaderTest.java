@@ -54,10 +54,11 @@ public class HeaderTest {
 	@Test
 	public void testToStringWithCookie() {
 		this.header.addCookie(new Cookie("test", "test"));
+		this.header.addCookie(new Cookie("test2", "test2"));
 		assertEquals("Accept-Language: en;q=0.1,en-us;q=0.5\n"
 				+ "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\n"
 				+ "Accept-Encoding: gzip,deflate\n"
-				+ "Accept: text/xml,text/html;q=0.1\n" + "Cookie: test=test\n",
-				header.toString());
+				+ "Accept: text/xml,text/html;q=0.1\n"
+				+ "Cookie: test=test; test2=test2", header.toString());
 	}
 }

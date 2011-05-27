@@ -13,6 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver.response;
 
+import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Status;
 import org.junit.Test;
 
@@ -49,12 +50,14 @@ public class ResponseBuilderTest {
 
 	@Test
 	public void contentIsAddedRight() throws Exception {
-		Response response = Response.ok().content("TestContent").build();
+		Response response = Response.ok().header(Header.Fields.DATE,
+				"2011-12-12").content("TestContent").build();
 		assertEquals(11, response.getContent().getLength());
 		assertEquals("TestContent", new String(response.getContent()
 				.getContent()));
-		assertEquals("HTTP/1.1 200 OK\n" + "Content-Length: 11\n" + "\n"
-				+ "TestContent\n", response.toString());
+		assertEquals("HTTP/1.1 200 OK\n" + "Date: 2011-12-12\n"
+				+ "Content-Length: 11\n" + "\n" + "TestContent\n", response
+				.toString());
 	}
 
 }

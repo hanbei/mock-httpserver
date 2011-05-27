@@ -17,87 +17,137 @@ package de.hanbei.httpserver.common;
 import java.net.URI;
 
 /**
- * A class to save the content send with a request or a response. Holds all necessary information of content i.e.
- * content length, mimetype, encoding and the actual content as byte array.
+ * A class to save the content send with a request or a response. Holds all
+ * necessary information of content i.e. content length, mimetype, encoding and
+ * the actual content as byte array.
  */
 public class Content {
 
-    private String encoding;
+	private String encoding;
 
-    private String mimetype;
+	private String mimetype;
 
-    private int length = -1;
+	private int length = -1;
 
-    private byte[] content;
+	private byte[] content;
 
-    private URI location;
+	private URI location;
 
-    public String getMimetype() {
-        return mimetype;
-    }
+	private String language;
 
-    public void setMimetype(String mimetype) {
-        this.mimetype = mimetype;
-    }
+	private String md5;
 
-    public int getLength() {
-        return length;
-    }
+	private String range;
 
-    public void setLength(int length) {
-        this.length = length;
-    }
+	public String getMimetype() {
+		return mimetype;
+	}
 
-    public byte[] getContent() {
-        return content;
-    }
+	public void setMimetype(String mimetype) {
+		this.mimetype = mimetype;
+	}
 
-    public void setContent(byte[] content) {
-        this.content = content;
-    }
+	public int getLength() {
+		return length;
+	}
 
-    public String getEncoding() {
-        return encoding;
-    }
+	public void setLength(int length) {
+		this.length = length;
+	}
 
-    public void setEncoding(String encoding) {
-        this.encoding = encoding;
-    }
+	public byte[] getContent() {
+		return content;
+	}
 
-    public URI getLocation() {
-        return location;
-    }
+	public void setContent(byte[] content) {
+		this.content = content;
+	}
 
-    public void setLocation(URI location) {
-        this.location = location;
-    }
+	public String getEncoding() {
+		return encoding;
+	}
 
-    @Override
-    public String toString() {
-        StringBuilder builder = new StringBuilder();
-        if (encoding != null) {
-            builder.append(Constants.CONTENT_ENCODING);
-            builder.append(": ");
-            builder.append(encoding);
-            builder.append("\n");
-        }
-        if (mimetype != null) {
-            builder.append(Constants.CONTENT_TYPE);
-            builder.append(": ");
-            builder.append(mimetype);
-            builder.append("\n");
-        }
-        if (length > 0) {
-            builder.append(Constants.CONTENT_LENGTH);
-            builder.append(": ");
-            builder.append(length);
-            builder.append("\n");
-        }
-        builder.append("\n");
-        if (content != null) {
-            builder.append(new String(content));
-            builder.append("\n");
-        }
-        return builder.toString();
-    }
+	public void setEncoding(String encoding) {
+		this.encoding = encoding;
+	}
+
+	public URI getLocation() {
+		return location;
+	}
+
+	public void setLocation(URI location) {
+		this.location = location;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		if (encoding != null) {
+			builder.append(Header.Fields.CONTENT_ENCODING);
+			builder.append(": ");
+			builder.append(encoding);
+			builder.append("\n");
+		}
+		if (mimetype != null) {
+			builder.append(Header.Fields.CONTENT_TYPE);
+			builder.append(": ");
+			builder.append(mimetype);
+			builder.append("\n");
+		}
+		if (length > 0) {
+			builder.append(Header.Fields.CONTENT_LENGTH);
+			builder.append(": ");
+			builder.append(length);
+			builder.append("\n");
+		}
+		if (language != null) {
+			builder.append(Header.Fields.CONTENT_LANGUAGE);
+			builder.append(": ");
+			builder.append(language);
+			builder.append("\n");
+		}
+		if (md5 != null) {
+			builder.append(Header.Fields.CONTENT_MD5);
+			builder.append(": ");
+			builder.append(md5);
+			builder.append("\n");
+		}
+		if (range != null) {
+			builder.append(Header.Fields.CONTENT_RANGE);
+			builder.append(": ");
+			builder.append(range);
+			builder.append("\n");
+		}
+		builder.append("\n");
+		if (content != null) {
+			builder.append(new String(content));
+			builder.append("\n");
+		}
+		return builder.toString();
+	}
+
+	public void setLanguage(String language) {
+		this.language = language;
+	}
+
+	public String getLanguage() {
+		return language;
+	}
+
+	public void setMd5(String md5) {
+		this.md5 = md5;
+	}
+
+	public String getMd5() {
+		return md5;
+	}
+
+	public void setRange(String range) {
+		this.range = range;
+	}
+
+	public String getRange() {
+		return range;
+	}
+
 }

@@ -13,30 +13,31 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver.request;
 
-import de.hanbei.httpserver.common.Constants;
-import de.hanbei.httpserver.common.Content;
-import de.hanbei.httpserver.common.Cookie;
-import de.hanbei.httpserver.common.HTTPVersion;
-import de.hanbei.httpserver.common.Header;
-import de.hanbei.httpserver.common.Method;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.StringTokenizer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.hanbei.httpserver.common.Content;
+import de.hanbei.httpserver.common.Cookie;
+import de.hanbei.httpserver.common.HTTPVersion;
+import de.hanbei.httpserver.common.Header;
+import de.hanbei.httpserver.common.Method;
+import de.hanbei.httpserver.exceptions.RequestParseException;
 
 /** Parses a request from an inputstream and returns a {@link Request} object. */
 public class RequestParser {
 
 	private static final Logger LOGGER = LoggerFactory
 			.getLogger(RequestParser.class);
+
+	private static final String CONTENT = "Content";
 
 	public Request parse(InputStream in) {
 		Request request = new Request();
@@ -48,9 +49,11 @@ public class RequestParser {
 				bytesOut.write(buffer, 0, bytesRead);
 			}
 		} catch (IOException e) {
-			e.printStackTrace(); // To change body of catch statement use File |
-			// Settings | File Templates.
+			throw new RequestParseException("", e);
 		}
+		String requestString = new String(bytesOut.toByteArray());
+		System.out.print(requestString);
+		System.out.print("----");
 		ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytesOut
 				.toByteArray());
 
@@ -58,12 +61,29 @@ public class RequestParser {
 			parseRequest(bytesIn, request);
 			parseHost(bytesIn, request);
 			parseHeader(bytesIn, request);
+			parseContent(bytesIn, request);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (URISyntaxException e) {
 			e.printStackTrace();
 		}
 		return request;
+	}
+
+	private void parseContent(ByteArrayInputStream bytesIn, Request request)
+			throws IOException {
+		Content content = request.getContent();
+		if (content.getLength() < 0) {
+			return;
+		}
+		byte[] contentBytes = new byte[content.getLength()];
+		// if (bytesIn.available() > 0) {
+		int readBytes = bytesIn.read(contentBytes);
+		if (readBytes != contentBytes.length) {
+			throw new RequestParseException("");
+		}
+		content.setContent(contentBytes);
+		// }
 	}
 
 	private void parseRequest(InputStream in, Request request)
@@ -104,8 +124,10 @@ public class RequestParser {
 		readLine(in, buffer);
 		String line = buffer.toString();
 		while (!line.isEmpty()) {
-			if (line.startsWith(Constants.COOKIE)) {
+			if (line.startsWith(Header.Fields.COOKIE)) {
 				parseCookie(line, header);
+			} else if (line.startsWith(CONTENT)) {
+				parseContentHeader(line, request);
 			} else {
 				parseHeaderField(line, header);
 			}
@@ -114,6 +136,32 @@ public class RequestParser {
 		}
 		// old_parse(in, request, header, buffer, line);
 		request.setHeader(header);
+	}
+
+	private void parseContentHeader(String line, Request request) {
+		Content content = request.getContent();
+		String[] parameterSplit = line.split(":");
+		if (parameterSplit.length == 2) {
+			String fieldName = parameterSplit[0].trim();
+
+			if (Header.Fields.CONTENT_ENCODING.equals(fieldName)) {
+				content.setEncoding(parameterSplit[1].trim());
+			} else if (Header.Fields.CONTENT_LANGUAGE.equals(fieldName)) {
+				content.setLanguage(parameterSplit[1].trim());
+			} else if (Header.Fields.CONTENT_LENGTH.equals(fieldName)) {
+				content.setLength(Integer.parseInt(parameterSplit[1].trim()));
+			} else if (Header.Fields.CONTENT_LOCATION.equals(fieldName)) {
+				content.setLocation(URI.create(parameterSplit[1].trim()));
+			} else if (Header.Fields.CONTENT_MD5.equals(fieldName)) {
+				content.setMd5(parameterSplit[1].trim());
+			} else if (Header.Fields.CONTENT_RANGE.equals(fieldName)) {
+				content.setRange(parameterSplit[1].trim());
+			} else if (Header.Fields.CONTENT_RANGE.equals(fieldName)) {
+				content.setRange(parameterSplit[1].trim());
+			} else if (Header.Fields.CONTENT_TYPE.equals(fieldName)) {
+				content.setMimetype(parameterSplit[1].trim());
+			}
+		}
 	}
 
 	private void parseCookie(String line, Header header) {
@@ -148,89 +196,6 @@ public class RequestParser {
 		}
 	}
 
-	private void old_parse(ByteArrayInputStream in, Request request,
-			Header header, StringBuffer buffer, String line) throws IOException {
-		while (line != null) {
-			if (line.startsWith(Constants.ACCEPT_MIMETYPE)) {
-				// StringTokenizer tokenizer = new StringTokenizer(line, ":,");
-				// tokenizer.nextToken();
-				// while (tokenizer.hasMoreTokens()) {
-				// Parameter qualityParameter = nextQualityParameter(tokenizer);
-				// if (line.startsWith(Constants.ACCEPT_CHARSET)) {
-				// header.addAcceptCharset(qualityParameter.value,
-				// qualityParameter.quality);
-				// } else if (line.startsWith(Constants.ACCEPT_ENCODING)) {
-				// header.addAcceptEncoding(qualityParameter.value,
-				// qualityParameter.quality);
-				// } else if (line.startsWith(Constants.ACCEPT_LANGUAGE)) {
-				// header.addAcceptLanguage(qualityParameter.value,
-				// qualityParameter.quality);
-				// } else if (line.startsWith(Constants.ACCEPT_MIMETYPE)) {
-				// header.addAcceptMimetype(qualityParameter.value,
-				// qualityParameter.quality);
-				// }
-				// }
-			} else if (line.startsWith(Constants.COOKIE)) {
-				StringTokenizer tokenizer = new StringTokenizer(line, " :;");
-				tokenizer.nextToken();
-				while (tokenizer.hasMoreTokens()) {
-					String nextCookieString = tokenizer.nextToken();
-					Cookie cookie = new Cookie();
-					int index = nextCookieString.indexOf("=");
-					cookie.setName(nextCookieString.substring(0, index).trim());
-					cookie.setValue(nextCookieString.substring(index + 1)
-							.trim());
-					header.addCookie(cookie);
-				}
-			} else if (line.startsWith("Content")) {
-				Content content = request.getContent();
-				StringTokenizer tokenizer = new StringTokenizer(line, ":;");
-				String contentString = tokenizer.nextToken();
-				if (Constants.CONTENT_TYPE.equals(contentString)) {
-					// why is this empty.
-				} else if (Constants.CONTENT_LENGTH.equals(contentString)) {
-					String contentLengthString = tokenizer.nextToken().trim();
-					int contentLength = Integer.parseInt(contentLengthString);
-					content.setLength(contentLength);
-				}
-			} else if (line.isEmpty()) {
-				Content content = request.getContent();
-				if (content.getLength() < 0) {
-					break;
-				}
-				byte[] contentBytes = new byte[content.getLength()];
-				if (in.available() > 0) {
-					int readBytes = in.read(contentBytes);
-					if (readBytes != contentBytes.length) {
-
-					}
-					content.setContent(contentBytes);
-				} else {
-					break;
-				}
-			} else {
-				StringTokenizer tokenizer = new StringTokenizer(line, " :");
-				header.addParameter(tokenizer.nextToken().trim(), tokenizer
-						.nextToken().trim());
-			}
-			readLine(in, buffer);
-			line = buffer.toString();
-		}
-	}
-
-	private Parameter nextQualityParameter(StringTokenizer tokenizer) {
-		String nextMimetype = tokenizer.nextToken();
-		int qualityIndex = nextMimetype.indexOf(";");
-		String mimetype = nextMimetype;
-		double quality = 1.0;
-		if (qualityIndex != -1) {
-			mimetype = nextMimetype.substring(0, qualityIndex);
-			quality = Double.parseDouble(nextMimetype.substring(nextMimetype
-					.lastIndexOf("=") + 1));
-		}
-		return new Parameter(mimetype.trim(), quality);
-	}
-
 	private static final int CR = 13;
 	private static final int LF = 10;
 	private int last = -1; // The last char we've read
@@ -262,9 +227,9 @@ public class RequestParser {
 			ch = in.read();
 		}
 		// Read the next byte and check if it's a LF
-		last = in.read();
-		if (last == LF) {
-			last = -1;
-		}
+		// last = in.read();
+		// if (last == LF) {
+		// last = -1;
+		// }
 	}
 }

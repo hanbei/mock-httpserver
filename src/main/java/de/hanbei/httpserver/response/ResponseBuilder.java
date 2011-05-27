@@ -13,10 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver.response;
 
-import de.hanbei.httpserver.common.Constants;
-import de.hanbei.httpserver.common.HTTPVersion;
-import de.hanbei.httpserver.common.Status;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -24,6 +20,10 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+
+import de.hanbei.httpserver.common.HTTPVersion;
+import de.hanbei.httpserver.common.Header;
+import de.hanbei.httpserver.common.Status;
 
 /** Builder Pattern implementation for building responses. */
 public class ResponseBuilder {
@@ -131,7 +131,7 @@ public class ResponseBuilder {
 	}
 
 	public ResponseBuilder expires(Date expires) {
-		response.getHeader().addParameter(Constants.EXPIRES,
+		response.getHeader().addParameter(Header.Fields.EXPIRES,
 				dateFormat.format(expires));
 		return this;
 	}
@@ -170,7 +170,7 @@ public class ResponseBuilder {
 	 * @return A ResponseBuilder to add additional information.
 	 */
 	public ResponseBuilder lastModified(Date lastModified) {
-		response.getHeader().addParameter(Constants.LAST_MODIFIED,
+		response.getHeader().addParameter(Header.Fields.LAST_MODIFIED,
 				dateFormat.format(lastModified));
 		return this;
 	}
