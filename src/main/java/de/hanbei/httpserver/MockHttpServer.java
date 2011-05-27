@@ -15,6 +15,7 @@ package de.hanbei.httpserver;
 
 
 import de.hanbei.httpserver.common.Method;
+import de.hanbei.httpserver.exceptions.ServerErrorException;
 import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.request.RequestParser;
 import de.hanbei.httpserver.response.Response;
@@ -70,7 +71,7 @@ public class MockHttpServer implements Runnable {
         synchronized (lock) {
             listenerThread.start();
             try {
-                lock.wait(startTimeout);
+                lock.wait();
             } catch (InterruptedException e) {
                 stop();
                 LOGGER.error("Error during startup", e);
@@ -173,7 +174,7 @@ public class MockHttpServer implements Runnable {
                 handle(clientSocket);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new ServerErrorException("Something went wrong during reading from the socket.", e);
         } finally {
             try {
                 if (serverSocket != null) {
@@ -323,4 +324,5 @@ public class MockHttpServer implements Runnable {
         System.in.read();
         server.stop();
     }
+
 }

@@ -34,7 +34,7 @@ import static org.junit.Assert.assertThat;
 
 public class RequestParserTest {
 
-    private static final String REQUEST = "GET /test/uri/ HTTP/1.1\nHost: localhost:8079\n"
+    private static final String GET_REQUEST = "GET /test/uri/ HTTP/1.1\nHost: localhost:8079\n"
             + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n"
             + "Accept-Language: en-us,en;q=0.5\n"
             + "Accept-Encoding: gzip,deflate\n"
@@ -43,30 +43,45 @@ public class RequestParserTest {
             + "Connection: keep-alive\n"
             + "Cookie: cookie1=testCookie1; cookie2=testCookie2\n";
 
-    // private static final String CONTENT = "Content-Type: text/xml charset=";
+    private static final String POST_REQUEST = "POST /test/uri/ HTTP/1.1\nHost: localhost:8079\n"
+            + "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n"
+            + "Accept-Language: en-us,en;q=0.5\n"
+            + "Accept-Encoding: gzip,deflate\n"
+            + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\n"
+            + "Keep-Alive: 115\n"
+            + "Connection: keep-alive\n"
+            + "Content-Length: 12\n"
+            + "Content-Type: text/plain\n"
+            + "\n123456789012\n\n";
+
+
     private RequestParser requestParser;
-    private Request request;
+    private Request getRequest;
+    private Request postRequest;
 
     @Before
     public void setUp() throws Exception {
+        System.out.println(POST_REQUEST);
         this.requestParser = new RequestParser();
-        request = this.requestParser.parse(new ByteArrayInputStream(REQUEST
+        getRequest = this.requestParser.parse(new ByteArrayInputStream(GET_REQUEST
                 .getBytes()));
+        //postRequest = this.requestParser.parse(new ByteArrayInputStream(POST_REQUEST
+//                .getBytes()));
     }
 
     @Test
     public void testParseRequestInfo() throws URISyntaxException {
-        assertEquals(Method.GET, request.getMethod());
-        assertEquals(new URI("/test/uri/"), request.getRequestUri());
-        assertEquals(HTTPVersion.VERSION1_1, request.getVersion());
-        assertEquals(new URI("localhost:8079"), request.getHost());
-        assertNotNull(request.getHeader());
+        assertEquals(Method.GET, getRequest.getMethod());
+        assertEquals(new URI("/test/uri/"), getRequest.getRequestUri());
+        assertEquals(HTTPVersion.VERSION1_1, getRequest.getVersion());
+        assertEquals(new URI("localhost:8079"), getRequest.getHost());
+        assertNotNull(getRequest.getHeader());
     }
 
     @Test
     public void testParseRequestHeaderAcceptMimetype()
             throws URISyntaxException {
-        Header header = request.getHeader();
+        Header header = getRequest.getHeader();
         assertNotNull(header);
         Set<String> acceptMimetypes = header.getAcceptMimetypes();
         assertThat(acceptMimetypes, hasItems("text/html",
@@ -85,7 +100,7 @@ public class RequestParserTest {
     @Test
     public void testParseRequestHeaderAcceptLanguage()
             throws URISyntaxException {
-        Header header = request.getHeader();
+        Header header = getRequest.getHeader();
         assertNotNull(header);
         Set<String> acceptLanguages = header.getAcceptLanguages();
         assertThat(acceptLanguages, hasItems("en-us", "en"));
@@ -96,7 +111,7 @@ public class RequestParserTest {
     @Test
     public void testParseRequestHeaderAcceptEncoding()
             throws URISyntaxException {
-        Header header = request.getHeader();
+        Header header = getRequest.getHeader();
         assertNotNull(header);
         Set<String> acceptEncoding = header.getAcceptEncoding();
         assertThat(acceptEncoding, hasItems("gzip", "deflate"));
@@ -107,9 +122,9 @@ public class RequestParserTest {
 
     @Test
     public void testParseRequestHeaderCookies() throws URISyntaxException {
-        Header header = request.getHeader();
+        Header header = getRequest.getHeader();
         assertNotNull(header);
-        List<Cookie> cookies = request.getHeader().getCookies();
+        List<Cookie> cookies = getRequest.getHeader().getCookies();
         assertEquals(2, cookies.size());
         assertThat(cookies, hasItems(new Cookie("cookie1", "testCookie1"),
                 new Cookie("cookie2", "testCookie2")));
@@ -117,9 +132,9 @@ public class RequestParserTest {
 
     @Test
     public void testParseRequestHeaderParameter() throws URISyntaxException {
-        Header header = request.getHeader();
+        Header header = getRequest.getHeader();
         assertNotNull(header);
-        Map<String, String> parameter = request.getHeader().getParameter();
+        Map<String, String> parameter = getRequest.getHeader().getParameter();
         assertEquals(2, parameter.size());
         assertThat(parameter.keySet(), hasItems("Keep-Alive", "Connection"));
         assertThat(parameter.values(), hasItems("keep-alive", "115"));
@@ -128,7 +143,7 @@ public class RequestParserTest {
     @Test
     public void testParseRequestHeaderAcceptCharset() throws URISyntaxException {
         Request request = this.requestParser.parse(new ByteArrayInputStream(
-                REQUEST.getBytes()));
+                GET_REQUEST.getBytes()));
         Header header = request.getHeader();
         assertNotNull(header);
         Set<String> acceptCharset = request.getHeader().getAcceptCharset();
@@ -137,6 +152,11 @@ public class RequestParserTest {
                 0.00000001);
         assertEquals(0.7, header.getAcceptCharsetQuality("utf-8"), 0.00000001);
         assertEquals(0.7, header.getAcceptCharsetQuality("*"), 0.00000001);
+    }
+
+    @Test
+    public void testParseContent() {
+//        assertEquals(12, postRequest.getContent().getLength());
     }
 
 }
