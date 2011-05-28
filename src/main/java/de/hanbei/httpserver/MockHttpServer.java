@@ -15,6 +15,7 @@ package de.hanbei.httpserver;
 
 
 import de.hanbei.httpserver.common.Method;
+import de.hanbei.httpserver.common.Status;
 import de.hanbei.httpserver.exceptions.ServerErrorException;
 import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.request.RequestParser;
@@ -34,13 +35,14 @@ import java.util.Map;
 
 public class MockHttpServer implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(MockHttpServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockHttpServer.class);
 
     private int port;
     private ServerSocket serverSocket;
 
-    private Map<Method, URIResponseMapping> predefinedResponses;
+    private Map<Method, Mapping<Response>> predefinedResponses;
+    private Map<Method, Mapping<RequestProcessor>> requestProcessorMapping;
+
     private Response defaultResponse;
 
     private boolean stopped;
@@ -55,16 +57,21 @@ public class MockHttpServer implements Runnable {
         this(80);
     }
 
-    /** Create a new MockHttpServer running on port 80. */
+    /**
+     * Create a new MockHttpServer running on port 80.
+     */
     public MockHttpServer(int port) {
         this.port = port;
         timeout = false;
         lock = new Object();
-        predefinedResponses = new HashMap<Method, URIResponseMapping>();
+        predefinedResponses = new HashMap<Method, Mapping<Response>>();
+        requestProcessorMapping = new HashMap<Method, Mapping<RequestProcessor>>();
         defaultResponse = Response.notFound().build();
     }
 
-    /** Start the server. */
+    /**
+     * Start the server.
+     */
     public void start() {
         isStopping = false;
         Thread listenerThread = new Thread(this, "MockHttpServer");
@@ -79,7 +86,9 @@ public class MockHttpServer implements Runnable {
         }
     }
 
-    /** Stop the server. */
+    /**
+     * Stop the server.
+     */
     public void stop() {
         if (!isRunning()) {
             return;
@@ -158,7 +167,9 @@ public class MockHttpServer implements Runnable {
         return !this.serverSocket.isClosed();
     }
 
-    /** Implementation of the socket listening thread. */
+    /**
+     * Implementation of the socket listening thread.
+     */
     public void run() {
         try {
             this.serverSocket = new ServerSocket(MockHttpServer.this.port);
@@ -208,7 +219,13 @@ public class MockHttpServer implements Runnable {
             }
 
 
-            Response response = getResponse(request);
+            RequestProcessor processor = getProcessor(request);
+            Response response = null;
+            if (processor != null) {
+                response = processor.process(request);
+            } else {
+                response = getResponse(request);
+            }
 
             sendResponse(response, clientSocket);
         } catch (IOException e) {
@@ -222,18 +239,26 @@ public class MockHttpServer implements Runnable {
         }
     }
 
-    private Response getResponse(Request request) {
-        LOGGER.debug(request.toString());
+    private RequestProcessor getProcessor(Request request) {
         String requestUri = trimSlashes(request.getRequestUri());
-        URIResponseMapping mapping = predefinedResponses.get(request.getMethod());
+        Mapping<RequestProcessor> mapping = requestProcessorMapping.get(request.getMethod());
+        RequestProcessor processor = null;
+        if (mapping != null) {
+            processor = mapping.get(requestUri);
+        }
+        return processor;
+    }
+
+    private Response getResponse(Request request) {
+        String requestUri = trimSlashes(request.getRequestUri());
+        Mapping<Response> mapping = predefinedResponses.get(request.getMethod());
         if (mapping == null) {
             return defaultResponse;
         }
-        Response response = mapping.getResponse(requestUri);
+        Response response = mapping.get(requestUri);
         if (response == null) {
             return defaultResponse;
         }
-        LOGGER.debug(response.toString());
         return response;
     }
 
@@ -304,12 +329,21 @@ public class MockHttpServer implements Runnable {
      * @param response The response that should be sent on a request on the specified uri with the specified method.
      */
     public void addResponse(Method method, URI uri, Response response) {
-        URIResponseMapping mapping = predefinedResponses.get(method);
+        Mapping<Response> mapping = predefinedResponses.get(method);
         if (mapping == null) {
-            mapping = new URIResponseMapping();
+            mapping = new Mapping<Response>();
             predefinedResponses.put(method, mapping);
         }
-        mapping.addResponse(trimSlashes(uri), response);
+        mapping.add(trimSlashes(uri), response);
+    }
+
+    public void addRequestProcessor(Method method, URI uri, RequestProcessor processor) {
+        Mapping<RequestProcessor> mapping = this.requestProcessorMapping.get(method);
+        if (mapping == null) {
+            mapping = new Mapping<RequestProcessor>();
+            requestProcessorMapping.put(method, mapping);
+        }
+        mapping.add(trimSlashes(uri), processor);
     }
 
     private String trimSlashes(URI uri) {
@@ -319,7 +353,17 @@ public class MockHttpServer implements Runnable {
 
     public static void main(String[] args) throws IOException {
         MockHttpServer server = new MockHttpServer();
-        server.setPort(8079);
+        server.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
+            @Override
+            public Response process(Request request) {
+                if ("Test".equals(request.getContent().getContentAsString())) {
+                    return Response.ok().build();
+                } else {
+                    return Response.status(Status.UNAUTHORIZED).build();
+                }
+            }
+        });
+        server.setPort(7001);
         server.start();
         System.in.read();
         server.stop();

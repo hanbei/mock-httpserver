@@ -24,27 +24,23 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
+import de.hanbei.httpserver.common.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.hanbei.httpserver.common.Cookie;
-import de.hanbei.httpserver.common.HTTPVersion;
-import de.hanbei.httpserver.common.Header;
-import de.hanbei.httpserver.common.Method;
-
 public class RequestParserTest {
 
-	private static final String REQUEST = "POST /test/uri/ HTTP/1.1\nHost: localhost:8079\n"
-			+ "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n"
-			+ "Accept-Language: en-us,en;q=0.5\n"
-			+ "Accept-Encoding: gzip,deflate\n"
-			+ "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\n"
-			+ "Keep-Alive: 115\n"
-			+ "Connection: keep-alive\n"
-			+ "Content-Length: 12\n"
-			+ "Content-Type: text/plain\n"
-			+ "Cookie: cookie1=testCookie1; cookie2=testCookie2\n"
-			+ "\n123456789012\n\n";
+	private static final String REQUEST = "POST /test/uri/ HTTP/1.1\r\nHost: localhost:8079\r\n"
+			+ "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+			+ "Accept-Language: en-us,en;q=0.5\r\n"
+			+ "Accept-Encoding: gzip,deflate\r\n"
+			+ "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\r\n"
+			+ "Keep-Alive: 115\r\n"
+			+ "Connection: keep-alive\r\n"
+			+ "Content-Length: 12\r\n"
+			+ "Content-Type: text/plain\r\n"
+			+ "Cookie: cookie1=testCookie1; cookie2=testCookie2\r\n"
+			+ "\r\n123456789012\r\n\r\n";
 
 	private RequestParser requestParser;
 	private Request request;
@@ -76,40 +72,40 @@ public class RequestParserTest {
 				Header.Fields.ACCEPT_CHARSET, Header.Fields.KEEP_ALIVE,
 				Header.Fields.CONNECTION));
 
-		List<Parameter> acceptMimetypes = header
+		List<Header.Parameter> acceptMimetypes = header
 				.getHeaderParameter(Header.Fields.ACCEPT);
 		assertEquals(4, acceptMimetypes.size());
-		assertThat(acceptMimetypes, hasItems(new Parameter("text/html"),
-				new Parameter("application/xhtml+xml"), new Parameter(
-						"application/xml", 0.9), new Parameter("*/*", 0.8)));
+		assertThat(acceptMimetypes, hasItems(new Header.Parameter("text/html"),
+				new Header.Parameter("application/xhtml+xml"), new Header.Parameter(
+						"application/xml", 0.9), new Header.Parameter("*/*", 0.8)));
 
-		List<Parameter> acceptLanguage = header
+		List<Header.Parameter> acceptLanguage = header
 				.getHeaderParameter(Header.Fields.ACCEPT_LANGUAGE);
 		assertEquals(2, acceptLanguage.size());
-		assertThat(acceptLanguage, hasItems(new Parameter("en-us"),
-				new Parameter("en", 0.5)));
+		assertThat(acceptLanguage, hasItems(new Header.Parameter("en-us"),
+				new Header.Parameter("en", 0.5)));
 
-		List<Parameter> acceptEncoding = header
+		List<Header.Parameter> acceptEncoding = header
 				.getHeaderParameter(Header.Fields.ACCEPT_ENCODING);
 		assertEquals(2, acceptEncoding.size());
-		assertThat(acceptEncoding, hasItems(new Parameter("gzip"),
-				new Parameter("deflate")));
+		assertThat(acceptEncoding, hasItems(new Header.Parameter("gzip"),
+				new Header.Parameter("deflate")));
 
-		List<Parameter> acceptCharset = header
+		List<Header.Parameter> acceptCharset = header
 				.getHeaderParameter(Header.Fields.ACCEPT_CHARSET);
 		assertEquals(3, acceptCharset.size());
-		assertThat(acceptCharset, hasItems(new Parameter("ISO-8859-1"),
-				new Parameter("utf-8", 0.7), new Parameter("*", 0.7)));
+		assertThat(acceptCharset, hasItems(new Header.Parameter("ISO-8859-1"),
+				new Header.Parameter("utf-8", 0.7), new Header.Parameter("*", 0.7)));
 
-		List<Parameter> keepAlive = header
+		List<Header.Parameter> keepAlive = header
 				.getHeaderParameter(Header.Fields.KEEP_ALIVE);
 		assertEquals(1, keepAlive.size());
-		assertThat(keepAlive, hasItems(new Parameter("115")));
+		assertThat(keepAlive, hasItems(new Header.Parameter("115")));
 
-		List<Parameter> connection = header
+		List<Header.Parameter> connection = header
 				.getHeaderParameter(Header.Fields.CONNECTION);
 		assertEquals(1, connection.size());
-		assertThat(connection, hasItems(new Parameter("keep-alive")));
+		assertThat(connection, hasItems(new Header.Parameter("keep-alive")));
 	}
 
 	@Test

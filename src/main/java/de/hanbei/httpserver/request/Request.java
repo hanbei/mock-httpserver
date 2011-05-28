@@ -20,6 +20,8 @@ import de.hanbei.httpserver.common.Method;
 
 import java.net.URI;
 
+import static de.hanbei.httpserver.common.Header.Fields;
+
 public class Request {
 
     private Method method;
@@ -27,8 +29,6 @@ public class Request {
     private URI requestUri;
 
     private HTTPVersion version;
-
-    private URI host;
 
     private Header header;
 
@@ -61,14 +61,6 @@ public class Request {
 
     public HTTPVersion getVersion() {
         return this.version;
-    }
-
-    public URI getHost() {
-        return this.host;
-    }
-
-    public void setHost(URI host) {
-        this.host = host;
     }
 
     @Override
@@ -109,4 +101,7 @@ public class Request {
         return (method == null) && (version == null) && (requestUri == null);
     }
 
+    public URI getHost() {
+        return URI.create(header.getHeaderValues(Fields.HOST).get(0));
+    }
 }

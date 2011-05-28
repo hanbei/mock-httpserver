@@ -15,11 +15,14 @@ package de.hanbei.httpserver;
 
 import de.hanbei.httpserver.common.Method;
 import de.hanbei.httpserver.common.Status;
+import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.response.Response;
 import org.apache.http.HttpResponse;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.junit.After;
@@ -45,6 +48,17 @@ public class MockHttpServerTest {
         httpServer.addResponse(Method.GET, new URI("/test"), Response.ok().build());
         httpServer.addResponse(Method.GET, new URI("/test3"), Response.ok().content("TestContent").build());
         httpServer.addResponse(Method.GET, new URI("/test2"), Response.status(Status.NOT_FOUND).build());
+
+        httpServer.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
+            @Override
+            public Response process(Request request) {
+                if (request.getContent().getContentAsString().equals("Test")) {
+                    return Response.ok().build();
+                } else {
+                    return Response.status(Status.UNAUTHORIZED).build();
+                }
+            }
+        });
         assertTrue(this.httpServer.isRunning());
 
         httpclient = new DefaultHttpClient(new ThreadSafeClientConnManager());
@@ -101,6 +115,18 @@ public class MockHttpServerTest {
         HttpGet httpget2 = new HttpGet("http://localhost:7001/default");
         HttpResponse response2 = httpclient.execute(httpget2);
         assertEquals(500, response2.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testRequestProcessor() throws IOException {
+        HttpPost httpPost = new HttpPost("http://localhost:7001/post");
+        HttpResponse response = httpclient.execute(httpPost);
+        assertEquals(401, response.getStatusLine().getStatusCode());
+
+        HttpPost httpPost2 = new HttpPost("http://localhost:7001/post");
+        httpPost2.setEntity(new StringEntity("Test"));
+        HttpResponse response2 = httpclient.execute(httpPost2);
+        assertEquals(200, response2.getStatusLine().getStatusCode());
     }
 
     @Test

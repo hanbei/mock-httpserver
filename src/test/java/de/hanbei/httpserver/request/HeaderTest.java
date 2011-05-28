@@ -27,15 +27,15 @@ public class HeaderTest {
 	@Before
 	public void setUp() throws Exception {
 		this.header = new Header();
-		this.header.addParameter("Accept", new Parameter("text/xml"));
-		this.header.addParameter("Accept", new Parameter("text/html", 0.1));
+		this.header.addParameter("Accept", new Header.Parameter("text/xml"));
+		this.header.addParameter("Accept", new Header.Parameter("text/html", 0.1));
 
-		this.header.addParameter("Accept-Language", new Parameter("en", 0.1));
+		this.header.addParameter("Accept-Language", new Header.Parameter("en", 0.1));
 		this.header
-				.addParameter("Accept-Language", new Parameter("en-us", 0.5));
+				.addParameter("Accept-Language", new Header.Parameter("en-us", 0.5));
 
-		this.header.addParameter("Accept-Encoding", new Parameter("gzip"));
-		this.header.addParameter("Accept-Encoding", new Parameter("deflate"));
+		this.header.addParameter("Accept-Encoding", new Header.Parameter("gzip"));
+		this.header.addParameter("Accept-Encoding", new Header.Parameter("deflate"));
 
 		this.header.addParameter("Accept-Charset", "ISO-8859-1");
 		this.header.addParameter("Accept-Charset", "utf-8", 0.7);
