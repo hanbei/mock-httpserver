@@ -173,20 +173,28 @@ public class RequestParser {
     }
 
     private void parseHeaderField(String line, Header header) {
-        String[] parameterSplit = line.split(":");
-        if (parameterSplit.length == 2) {
-            String[] parameterValueSplit = parameterSplit[1].split(",");
-            for (String parameterString : parameterValueSplit) {
-                if (parameterString.indexOf(';') != -1) {
-                    String[] valueQualitySplit = parameterString.split(";");
-                    Header.Parameter parameter = new Header.Parameter(valueQualitySplit[0]
-                            .trim(), Double.parseDouble(valueQualitySplit[1]
-                            .substring(2)));
-                    header.addParameter(parameterSplit[0].trim(), parameter);
-                } else {
-                    header.addParameter(parameterSplit[0].trim(),
-                            parameterString.trim());
-                }
+        int indexOfColon = line.indexOf(':');
+        if (indexOfColon == -1) {
+            LOGGER.info("No header field {}", line);
+            return;
+        }
+
+        String fieldName = line.substring(0, indexOfColon);
+        String fieldValue = line.substring(indexOfColon + 1);
+        if (fieldValue.isEmpty()) {
+            return;
+        }
+        String[] parameterValueSplit = fieldValue.split(",");
+        for (String parameterString : parameterValueSplit) {
+            if (parameterString.indexOf(';') != -1) {
+                String[] valueQualitySplit = parameterString.split(";");
+                Header.Parameter parameter = new Header.Parameter(valueQualitySplit[0]
+                        .trim(), Double.parseDouble(valueQualitySplit[1]
+                        .substring(2)));
+                header.addParameter(fieldName.trim(), parameter);
+            } else {
+                header.addParameter(fieldName.trim(),
+                        parameterString.trim());
             }
         }
     }
