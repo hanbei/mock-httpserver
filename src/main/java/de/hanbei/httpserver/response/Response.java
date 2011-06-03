@@ -23,7 +23,7 @@ import de.hanbei.httpserver.common.Status;
  * A HTTP response. Instances of this class can be build by calling the static creation methods and using the {@link
  * ResponseBuilder} class.
  */
-public class Response {
+public final class Response {
 
     private HTTPVersion httpVersion = HTTPVersion.VERSION1_1;
 

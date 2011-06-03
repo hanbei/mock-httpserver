@@ -60,7 +60,8 @@ public class Content {
     }
 
     public void setContent(byte[] content) {
-        this.content = content;
+        this.content = new byte[content.length];
+        System.arraycopy(content, 0, this.content, 0, content.length);
     }
 
     public String getEncoding() {

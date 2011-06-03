@@ -43,13 +43,12 @@ public class RequestParser {
         byte[] buffer = new byte[1024];
         try {
             int bytesRead;
-            while (in.available() > 0 && (bytesRead = in.read(buffer)) != -1) {
+            while (in.available() > 0 && (bytesRead = in.read(buffer)) != -1) { // NOSONAR
                 bytesOut.write(buffer, 0, bytesRead);
             }
         } catch (IOException e) {
             throw new RequestParseException("", e);
         }
-        String requestString = new String(bytesOut.toByteArray());
         ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytesOut
                 .toByteArray());
 
@@ -58,9 +57,9 @@ public class RequestParser {
             parseHeader(bytesIn, request);
             parseContent(bytesIn, request);
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RequestParseException(e);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            throw new RequestParseException(e);
         }
         return request;
     }
@@ -95,7 +94,7 @@ public class RequestParser {
 
         String httpVersionString = tokenizer.nextToken();
         request.setVersion(HTTPVersion.parseString(httpVersionString
-                .substring(httpVersionString.indexOf("/") + 1)));
+                .substring(httpVersionString.indexOf('/') + 1)));
     }
 
 //    private void parseHost(ByteArrayInputStream in, Request request)
@@ -165,7 +164,7 @@ public class RequestParser {
         while (tokenizer.hasMoreTokens()) {
             String nextCookieString = tokenizer.nextToken();
             Cookie cookie = new Cookie();
-            int index = nextCookieString.indexOf("=");
+            int index = nextCookieString.indexOf('=');
             cookie.setName(nextCookieString.substring(0, index).trim());
             cookie.setValue(nextCookieString.substring(index + 1).trim());
             header.addCookie(cookie);

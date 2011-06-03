@@ -22,7 +22,7 @@ import java.net.URI;
 
 import static de.hanbei.httpserver.common.Header.Fields;
 
-public class Request {
+public final class Request {
 
     private Method method;
 

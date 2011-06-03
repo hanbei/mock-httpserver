@@ -13,7 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver.common;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 public class Header {
 
@@ -49,6 +52,9 @@ public class Header {
         public static final String USER_AGENT = "User-Agent";
         public static final String ALLOW = "Allow";
 
+        private Fields() {
+            // no construction
+        }
     }
 
     public static class Parameter {
@@ -79,21 +85,27 @@ public class Header {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj)
+            if (this == obj) {
                 return true;
-            if (obj == null)
+            }
+            if (obj == null) {
                 return false;
-            if (getClass() != obj.getClass())
+            }
+            if (getClass() != obj.getClass()) {
                 return false;
+            }
             Parameter other = (Parameter) obj;
             if (Double.doubleToLongBits(quality) != Double
-                    .doubleToLongBits(other.quality))
+                    .doubleToLongBits(other.quality)) {
                 return false;
+            }
             if (value == null) {
-                if (other.value != null)
+                if (other.value != null) {
                     return false;
-            } else if (!value.equals(other.value))
+                }
+            } else if (!value.equals(other.value)) {
                 return false;
+            }
             return true;
         }
 
@@ -194,7 +206,7 @@ public class Header {
     }
 
     public void setCookies(List<Cookie> cookies) {
-        cookies = new ArrayList<Cookie>(cookies);
+        this.cookies = new ArrayList<Cookie>(cookies);
     }
 
     public void addParameter(String field, String value, double quality) {

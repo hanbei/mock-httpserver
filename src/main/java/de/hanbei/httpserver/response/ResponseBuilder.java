@@ -97,7 +97,7 @@ public class ResponseBuilder {
 			ObjectOutputStream objectOut = new ObjectOutputStream(bytes);
 			objectOut.writeObject(content);
 		} catch (IOException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		content(bytes.toByteArray());
 		return this;
