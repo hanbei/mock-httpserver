@@ -20,7 +20,7 @@ import java.util.Set;
 
 public class Header {
 
-    public static class Fields {
+    public static final class Fields {
         public static final String CONNECTION = "Connection";
         public static final String DATE = "Date";
         public static final String PRAGMA = "Pragma";

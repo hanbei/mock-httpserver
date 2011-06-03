@@ -13,6 +13,7 @@ public class MultiValuedMap<K, V> extends HashMap<K, List<V>> {
 	private static final long serialVersionUID = 2661811732610654118L;
 
 	public MultiValuedMap() {
+        super();
 	}
 
 	public MultiValuedMap(MultiValuedMap<K, V> that) {

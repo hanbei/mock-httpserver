@@ -13,6 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver.request;
 
+import de.hanbei.httpserver.common.*;
+import de.hanbei.httpserver.exceptions.RequestParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,21 +26,20 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.StringTokenizer;
 
-import de.hanbei.httpserver.common.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.hanbei.httpserver.exceptions.RequestParseException;
-
 /**
  * Parses a request from an inputstream and returns a {@link Request} object.
  */
 public class RequestParser {
 
+    private static final int CR = 13;
+    private static final int LF = 10;
+
     private static final Logger LOGGER = LoggerFactory
             .getLogger(RequestParser.class);
 
     private static final String CONTENT = "Content";
+
+    private int last = -1; // The last char we've read
 
     public Request parse(InputStream in) {
         Request request = new Request();
@@ -97,20 +101,6 @@ public class RequestParser {
                 .substring(httpVersionString.indexOf('/') + 1)));
     }
 
-//    private void parseHost(ByteArrayInputStream in, Request request)
-//            throws IOException, URISyntaxException {
-//        StringBuffer line = new StringBuffer();
-//        readLine(in, line);
-//        if (line.length() == 0) {
-//            return;
-//        }
-//        LOGGER.trace(line.toString());
-//        StringTokenizer tokenizer = new StringTokenizer(line.toString());
-//        tokenizer.nextToken();
-//        String host = tokenizer.nextToken();
-//        request.setHost(new URI(host));
-//    }
-
     private void parseHeader(ByteArrayInputStream in, Request request)
             throws IOException {
         Header header = new Header();
@@ -128,7 +118,6 @@ public class RequestParser {
             readLine(in, buffer);
             line = buffer.toString();
         }
-        // old_parse(in, request, header, buffer, line);
         request.setHeader(header);
     }
 
@@ -198,9 +187,6 @@ public class RequestParser {
         }
     }
 
-    private static final int CR = 13;
-    private static final int LF = 10;
-    private int last = -1; // The last char we've read
 
     /**
      * Read a line of data from the underlying inputstream and save it in the
