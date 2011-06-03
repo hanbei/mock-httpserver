@@ -13,7 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver.request;
 
-import de.hanbei.httpserver.common.*;
+import de.hanbei.httpserver.common.Content;
+import de.hanbei.httpserver.common.Cookie;
+import de.hanbei.httpserver.common.HTTPVersion;
+import de.hanbei.httpserver.common.Header;
+import de.hanbei.httpserver.common.Method;
 import de.hanbei.httpserver.exceptions.RequestParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
