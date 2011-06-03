@@ -56,7 +56,9 @@ public class Content {
     }
 
     public byte[] getContent() {
-        return content;
+        byte[] result = new byte[content.length];
+        System.arraycopy(content, 0, result, 0, content.length);
+        return result;
     }
 
     public void setContent(byte[] content) {

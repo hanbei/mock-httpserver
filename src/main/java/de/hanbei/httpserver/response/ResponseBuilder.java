@@ -24,6 +24,7 @@ import java.util.TimeZone;
 import de.hanbei.httpserver.common.HTTPVersion;
 import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Status;
+import de.hanbei.httpserver.exceptions.ContentException;
 
 /** Builder Pattern implementation for building responses. */
 public class ResponseBuilder {
@@ -97,7 +98,7 @@ public class ResponseBuilder {
 			ObjectOutputStream objectOut = new ObjectOutputStream(bytes);
 			objectOut.writeObject(content);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new ContentException(e);
 		}
 		content(bytes.toByteArray());
 		return this;
