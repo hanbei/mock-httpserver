@@ -23,7 +23,7 @@ import java.net.URI;
  */
 public class Content {
 
-    private String encoding;
+    private String encoding = "UTF-8";
 
     private String mimetype;
 

@@ -24,7 +24,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -37,8 +38,8 @@ public class MockHttpServer implements Runnable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockHttpServer.class);
 
-    private int port;
     private ServerSocket serverSocket;
+    private int port;
 
     private Map<Method, Mapping<Response>> predefinedResponses;
     private Map<Method, Mapping<RequestProcessor>> requestProcessorMapping;
@@ -57,9 +58,7 @@ public class MockHttpServer implements Runnable {
         this(80);
     }
 
-    /**
-     * Create a new MockHttpServer running on port 80.
-     */
+    /** Create a new MockHttpServer running on port 80. */
     public MockHttpServer(int port) {
         this.port = port;
         timeout = false;
@@ -69,52 +68,48 @@ public class MockHttpServer implements Runnable {
         defaultResponse = Response.notFound().build();
     }
 
-    /**
-     * Start the server.
-     */
+    /** Start the server. */
     public void start() {
         isStopping = false;
         Thread listenerThread = new Thread(this, "MockHttpServer");
-        synchronized (lock) {
+        synchronized ( lock ) {
             listenerThread.start();
             try {
                 lock.wait();
-            } catch (InterruptedException e) {
+            } catch ( InterruptedException e ) {
                 stop();
                 LOGGER.error("Error during startup", e);
             }
         }
     }
 
-    /**
-     * Stop the server.
-     */
+    /** Stop the server. */
     public void stop() {
-        if (!isRunning()) {
+        if ( !isRunning() ) {
             return;
         }
         isStopping = true;
         try {
-            if (this.serverSocket == null || this.serverSocket.isClosed()) {
+            if ( this.serverSocket == null || this.serverSocket.isClosed() ) {
                 return;
             }
             InetAddress serverAddress = this.serverSocket.getInetAddress();
             Socket socket = new Socket(serverAddress, this.port);
             socket.close();
-            synchronized (lock) {
+            synchronized ( lock ) {
                 lock.wait();
             }
 
-        } catch (ConnectException e) {
+        } catch ( ConnectException e ) {
             try {
                 LOGGER.info("Could not send close request. But server socket is not waiting, just closing it.");
                 serverSocket.close();
-            } catch (IOException e1) {
+            } catch ( IOException e1 ) {
                 LOGGER.error("Error while stopping server", e);
             }
-        } catch (IOException e) {
+        } catch ( IOException e ) {
             LOGGER.warn("Error while stopping server", e);
-        } catch (InterruptedException e) {
+        } catch ( InterruptedException e ) {
             LOGGER.warn("Error while stopping server", e);
         }
     }
@@ -161,15 +156,13 @@ public class MockHttpServer implements Runnable {
      * @return true if the server is already running.
      */
     public boolean isRunning() {
-        if (this.serverSocket == null) {
+        if ( this.serverSocket == null ) {
             return !this.stopped;
         }
         return !this.serverSocket.isClosed();
     }
 
-    /**
-     * Implementation of the socket listening thread.
-     */
+    /** Implementation of the socket listening thread. */
     public void run() {
         try {
             this.serverSocket = new ServerSocket(MockHttpServer.this.port);
@@ -177,25 +170,25 @@ public class MockHttpServer implements Runnable {
                     MockHttpServer.this.serverSocket.getInetAddress(),
                     MockHttpServer.this.serverSocket.getLocalPort());
             this.stopped = false;
-            synchronized (lock) {
+            synchronized ( lock ) {
                 lock.notifyAll();
             }
-            while (!MockHttpServer.this.isStopping) {
+            while ( !MockHttpServer.this.isStopping ) {
                 Socket clientSocket = MockHttpServer.this.serverSocket.accept();
                 handle(clientSocket);
             }
-        } catch (IOException e) {
+        } catch ( IOException e ) {
             throw new ServerErrorException("Something went wrong during reading from the socket.", e);
         } finally {
             try {
-                if (serverSocket != null) {
+                if ( serverSocket != null ) {
                     this.serverSocket.close();
                 }
-            } catch (IOException e) {
+            } catch ( IOException e ) {
                 LOGGER.error("Error while closing socket", e);
             }
             this.stopped = true;
-            synchronized (lock) {
+            synchronized ( lock ) {
                 lock.notifyAll();
             }
         }
@@ -204,36 +197,36 @@ public class MockHttpServer implements Runnable {
     private void handle(Socket clientSocket) {
         try {
             Request request = readRequest(clientSocket);
-            if (request == null || request.isEmpty()) {
+            if ( request == null || request.isEmpty() ) {
                 LOGGER.warn("No Request");
                 return;
             }
 
-            if (timeout) {
+            if ( timeout ) {
                 return;
             }
 
 
-            if (clientSocket.isClosed()) {
+            if ( clientSocket.isClosed() ) {
                 return;
             }
 
 
             RequestProcessor processor = getProcessor(request);
             Response response = null;
-            if (processor != null) {
+            if ( processor != null ) {
                 response = processor.process(request);
             } else {
                 response = getResponse(request);
             }
 
             sendResponse(response, clientSocket);
-        } catch (IOException e) {
+        } catch ( IOException e ) {
             LOGGER.warn("", e);
         } finally {
             try {
                 clientSocket.close();
-            } catch (IOException e) {
+            } catch ( IOException e ) {
                 LOGGER.warn("", e);
             }
         }
@@ -243,7 +236,7 @@ public class MockHttpServer implements Runnable {
         String requestUri = trimSlashes(request.getRequestUri());
         Mapping<RequestProcessor> mapping = requestProcessorMapping.get(request.getMethod());
         RequestProcessor processor = null;
-        if (mapping != null) {
+        if ( mapping != null ) {
             processor = mapping.get(requestUri);
         }
         return processor;
@@ -252,21 +245,21 @@ public class MockHttpServer implements Runnable {
     private Response getResponse(Request request) {
         String requestUri = trimSlashes(request.getRequestUri());
         Mapping<Response> mapping = predefinedResponses.get(request.getMethod());
-        if (mapping == null) {
+        if ( mapping == null ) {
             return defaultResponse;
         }
         Response response = mapping.get(requestUri);
-        if (response == null) {
+        if ( response == null ) {
             return defaultResponse;
         }
         return response;
     }
 
     private Request readRequest(Socket clientSocket) throws IOException {
-        synchronized (lock) {
+        synchronized ( lock ) {
             try {
                 lock.wait(100);
-            } catch (InterruptedException e) {
+            } catch ( InterruptedException e ) {
                 return null;
             }
         }
@@ -276,19 +269,19 @@ public class MockHttpServer implements Runnable {
     }
 
     private void sendResponse(Response response, Socket clientSocket) throws IOException {
-        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
-        out.println(response.toString());
+        String encoding = response.getContent().getEncoding();
+        OutputStream outputStream = clientSocket.getOutputStream();
+        OutputStreamWriter out = new OutputStreamWriter(outputStream, encoding);
+        out.write(response.toString());
         out.flush();
     }
 
     /**
      * Get the default response the server should send on any request that is not specified via {@link
-     * MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI,
-     * de.hanbei.httpserver.response.Response)}.
+     * MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI, de.hanbei.httpserver.response.Response)}.
      *
      * @return The default response.
-     * @see MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI,
-     *      de.hanbei.httpserver.response.Response)
+     * @see MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI, de.hanbei.httpserver.response.Response)
      */
     public Response getDefaultResponse() {
         return defaultResponse;
@@ -330,7 +323,7 @@ public class MockHttpServer implements Runnable {
      */
     public void addResponse(Method method, URI uri, Response response) {
         Mapping<Response> mapping = predefinedResponses.get(method);
-        if (mapping == null) {
+        if ( mapping == null ) {
             mapping = new Mapping<Response>();
             predefinedResponses.put(method, mapping);
         }
@@ -339,7 +332,7 @@ public class MockHttpServer implements Runnable {
 
     public void addRequestProcessor(Method method, URI uri, RequestProcessor processor) {
         Mapping<RequestProcessor> mapping = this.requestProcessorMapping.get(method);
-        if (mapping == null) {
+        if ( mapping == null ) {
             mapping = new Mapping<RequestProcessor>();
             requestProcessorMapping.put(method, mapping);
         }
@@ -356,7 +349,7 @@ public class MockHttpServer implements Runnable {
         server.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
             @Override
             public Response process(Request request) {
-                if ("Test".equals(request.getContent().getContentAsString())) {
+                if ( "Test".equals(request.getContent().getContentAsString()) ) {
                     return Response.ok().build();
                 } else {
                     return Response.status(Status.UNAUTHORIZED).build();

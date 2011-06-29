@@ -17,6 +17,7 @@ import de.hanbei.httpserver.common.Method;
 import de.hanbei.httpserver.common.Status;
 import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.response.Response;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpClient;
@@ -48,11 +49,12 @@ public class MockHttpServerTest {
         httpServer.addResponse(Method.GET, new URI("/test"), Response.ok().build());
         httpServer.addResponse(Method.GET, new URI("/test3"), Response.ok().content("TestContent").build());
         httpServer.addResponse(Method.GET, new URI("/test2"), Response.status(Status.NOT_FOUND).build());
+        httpServer.addResponse(Method.GET, new URI("/testUtf8"), Response.ok().content("Cæelo").build());
 
         httpServer.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
             @Override
             public Response process(Request request) {
-                if (request.getContent().getContentAsString().equals("Test")) {
+                if ( request.getContent().getContentAsString().equals("Test") ) {
                     return Response.ok().build();
                 } else {
                     return Response.status(Status.UNAUTHORIZED).build();
@@ -103,6 +105,16 @@ public class MockHttpServerTest {
         HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet("http://localhost:7001/timeout");
         httpclient.execute(httpget);
+    }
+
+    @Test
+    public void getContentUTF8Encoding() throws IOException {
+        HttpGet httpget = new HttpGet("http://localhost:7001/testUtf8");
+        HttpResponse response = httpclient.execute(httpget);
+        assertEquals(200, response.getStatusLine().getStatusCode());
+        String encoding = response.getEntity().getContentEncoding().getValue();
+        String content = IOUtils.toString(response.getEntity().getContent(), encoding);
+        assertEquals("Cæelo", content.trim());
     }
 
     @Test
