@@ -29,6 +29,7 @@ import java.util.TimeZone;
 /** Builder Pattern implementation for building responses. */
 public class ResponseBuilder {
 
+    private static final String TEXT_PLAIN = "text/plain";
     private Response response;
 
     private final SimpleDateFormat dateFormat;
@@ -87,7 +88,7 @@ public class ResponseBuilder {
      * @param content The content as as an object.
      * @return A ResponseBuilder to add additional information.
      */
-    public ResponseBuilder content(Object content, String encoding) {
+    public ResponseBuilder content(Object content) {
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         try {
             ObjectOutputStream objectOut = new ObjectOutputStream(bytes);
@@ -95,7 +96,7 @@ public class ResponseBuilder {
         } catch ( IOException e ) {
             throw new ContentException(e);
         }
-        content(bytes.toByteArray(), encoding);
+        content(bytes.toByteArray());
         return this;
     }
 
@@ -106,7 +107,7 @@ public class ResponseBuilder {
      * @return A ResponseBuilder to add additional information.
      */
     public ResponseBuilder content(String content) {
-        content(content.getBytes(), "UTF-8");
+        content(content.getBytes());
         return this;
     }
 
@@ -116,10 +117,9 @@ public class ResponseBuilder {
      * @param content The content as as a byte array.
      * @return A ResponseBuilder to add additional information.
      */
-    public ResponseBuilder content(byte[] content, String encoding) {
+    public ResponseBuilder content(byte[] content) {
         response.getContent().setContent(content);
         response.getContent().setLength(content.length);
-        response.getContent().setEncoding(encoding);
         return this;
     }
 
@@ -184,5 +184,4 @@ public class ResponseBuilder {
         response.getContent().setMimetype(type);
         return this;
     }
-
 }

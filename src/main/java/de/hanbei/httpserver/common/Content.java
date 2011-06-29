@@ -17,15 +17,17 @@ package de.hanbei.httpserver.common;
 import java.net.URI;
 
 /**
- * A class to save the content send with a request or a response. Holds all
- * necessary information of content i.e. content length, mimetype, encoding and
- * the actual content as byte array.
+ * A class to save the content send with a request or a response. Holds all necessary information of content i.e. content length, mimetype,
+ * encoding and the actual content as byte array.
  */
 public class Content {
 
-    private String encoding = "UTF-8";
+    private static final String UTF8_ENCODING = "utf-8";
+    private String encoding;
 
     private String mimetype;
+
+    private String charset = UTF8_ENCODING;
 
     private int length = -1;
 
@@ -44,7 +46,20 @@ public class Content {
     }
 
     public void setMimetype(String mimetype) {
-        this.mimetype = mimetype;
+        this.mimetype = getType(mimetype);
+        this.charset = getCharset(mimetype);
+    }
+
+    private String getType(String mimetype) {
+        return mimetype.split(";")[0];
+    }
+
+    private String getCharset(String mimetype) {
+        String[] charset = mimetype.split(";");
+        if ( charset.length > 1) {
+            return charset[1].split("=")[1];
+        }
+        return UTF8_ENCODING;
     }
 
     public int getLength() {
@@ -85,47 +100,51 @@ public class Content {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        if (encoding != null) {
-            builder.append(Header.Fields.CONTENT_ENCODING);
-            builder.append(": ");
-            builder.append(encoding);
+        if ( content != null ) {
+            if ( encoding != null ) {
+                builder.append(Header.Fields.CONTENT_ENCODING);
+                builder.append(": ");
+                builder.append(encoding);
+                builder.append("\n");
+            }
+            if ( mimetype != null ) {
+                builder.append(Header.Fields.CONTENT_TYPE);
+                builder.append(": ");
+                builder.append(mimetype);
+                if ( charset != null ) {
+                    builder.append("; charset=");
+                    builder.append(charset);
+                }
+                builder.append("\n");
+            }
+            if ( length > 0 ) {
+                builder.append(Header.Fields.CONTENT_LENGTH);
+                builder.append(": ");
+                builder.append(length);
+                builder.append("\n");
+            }
+            if ( language != null ) {
+                builder.append(Header.Fields.CONTENT_LANGUAGE);
+                builder.append(": ");
+                builder.append(language);
+                builder.append("\n");
+            }
+            if ( md5 != null ) {
+                builder.append(Header.Fields.CONTENT_MD5);
+                builder.append(": ");
+                builder.append(md5);
+                builder.append("\n");
+            }
+            if ( range != null ) {
+                builder.append(Header.Fields.CONTENT_RANGE);
+                builder.append(": ");
+                builder.append(range);
+                builder.append("\n");
+            }
             builder.append("\n");
-        }
-        if (mimetype != null) {
-            builder.append(Header.Fields.CONTENT_TYPE);
-            builder.append(": ");
-            builder.append(mimetype);
-            builder.append("\n");
-        }
-        if (length > 0) {
-            builder.append(Header.Fields.CONTENT_LENGTH);
-            builder.append(": ");
-            builder.append(length);
-            builder.append("\n");
-        }
-        if (language != null) {
-            builder.append(Header.Fields.CONTENT_LANGUAGE);
-            builder.append(": ");
-            builder.append(language);
-            builder.append("\n");
-        }
-        if (md5 != null) {
-            builder.append(Header.Fields.CONTENT_MD5);
-            builder.append(": ");
-            builder.append(md5);
-            builder.append("\n");
-        }
-        if (range != null) {
-            builder.append(Header.Fields.CONTENT_RANGE);
-            builder.append(": ");
-            builder.append(range);
-            builder.append("\n");
+            builder.append(new String(content));
         }
         builder.append("\n");
-        if (content != null) {
-            builder.append(new String(content));
-            builder.append("\n");
-        }
         return builder.toString();
     }
 
@@ -154,9 +173,17 @@ public class Content {
     }
 
     public String getContentAsString() {
-        if (content != null) {
+        if ( content != null ) {
             return new String(content);
         }
         return "";
+    }
+
+    public String getCharset() {
+        return charset;
+    }
+
+    public void setCharset(String charset) {
+        this.charset = charset;
     }
 }

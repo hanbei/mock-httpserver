@@ -1,11 +1,11 @@
 package de.hanbei.httpserver.common;
 
-import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.net.URI;
 
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 public class ContentTest {
 
@@ -23,7 +23,14 @@ public class ContentTest {
 
 	@Test
 	public void testToString() {
-		assertEquals("Content-Encoding: gzip\n" + "Content-Type: text/plain\n"
+		assertEquals("Content-Encoding: gzip\n" + "Content-Type: text/plain; charset=utf-8\n"
+				+ "Content-Length: 8\n\nTestData\n", content.toString());
+	}
+
+    @Test
+	public void testSetMimetype() {
+        content.setMimetype("text/plain; charset=us-ascii");
+		assertEquals("Content-Encoding: gzip\n" + "Content-Type: text/plain; charset=us-ascii\n"
 				+ "Content-Length: 8\n\nTestData\n", content.toString());
 	}
 

@@ -269,9 +269,9 @@ public class MockHttpServer implements Runnable {
     }
 
     private void sendResponse(Response response, Socket clientSocket) throws IOException {
-        String encoding = response.getContent().getEncoding();
+        String charset = response.getContent().getCharset();
         OutputStream outputStream = clientSocket.getOutputStream();
-        OutputStreamWriter out = new OutputStreamWriter(outputStream, encoding);
+        OutputStreamWriter out = new OutputStreamWriter(outputStream, charset);
         out.write(response.toString());
         out.flush();
     }

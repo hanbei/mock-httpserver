@@ -18,6 +18,8 @@ import de.hanbei.httpserver.common.Status;
 import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.response.Response;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpClient;
@@ -49,7 +51,7 @@ public class MockHttpServerTest {
         httpServer.addResponse(Method.GET, new URI("/test"), Response.ok().build());
         httpServer.addResponse(Method.GET, new URI("/test3"), Response.ok().content("TestContent").build());
         httpServer.addResponse(Method.GET, new URI("/test2"), Response.status(Status.NOT_FOUND).build());
-        httpServer.addResponse(Method.GET, new URI("/testUtf8"), Response.ok().content("Cæelo").build());
+        httpServer.addResponse(Method.GET, new URI("/testUtf8"), Response.ok().content("Cæelo").type("text/plain; charset=iso-8859-1").build());
 
         httpServer.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
             @Override
@@ -110,10 +112,12 @@ public class MockHttpServerTest {
     @Test
     public void getContentUTF8Encoding() throws IOException {
         HttpGet httpget = new HttpGet("http://localhost:7001/testUtf8");
+        httpget.setHeader("Accept-Charset","utf-8");
         HttpResponse response = httpclient.execute(httpget);
         assertEquals(200, response.getStatusLine().getStatusCode());
-        String encoding = response.getEntity().getContentEncoding().getValue();
-        String content = IOUtils.toString(response.getEntity().getContent(), encoding);
+        HttpEntity entity = response.getEntity();
+        Header mimetype = entity.getContentType();
+        String content = IOUtils.toString(entity.getContent(), "iso-8859-1");
         assertEquals("Cæelo", content.trim());
     }
 
