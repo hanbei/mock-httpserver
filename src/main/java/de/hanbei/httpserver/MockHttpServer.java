@@ -264,7 +264,6 @@ public class MockHttpServer implements Runnable {
             }
         }
         RequestParser requestParser = new RequestParser();
-        clientSocket.getInputStream();
         return requestParser.parse(clientSocket.getInputStream());
     }
 
@@ -273,7 +272,8 @@ public class MockHttpServer implements Runnable {
         OutputStream outputStream = clientSocket.getOutputStream();
         OutputStreamWriter out = new OutputStreamWriter(outputStream, charset);
         out.write(response.toString());
-        out.flush();
+        out.write("\n");
+        out.close();
     }
 
     /**
@@ -356,6 +356,7 @@ public class MockHttpServer implements Runnable {
                 }
             }
         });
+        server.addResponse(Method.GET, URI.create("test"), Response.notFound().build());
         server.setPort(7001);
         server.start();
         System.in.read();
