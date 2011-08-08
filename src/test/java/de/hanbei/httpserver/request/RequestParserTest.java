@@ -13,10 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver.request;
 
-import static org.hamcrest.collection.IsCollectionContaining.hasItems;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import de.hanbei.httpserver.common.Cookie;
+import de.hanbei.httpserver.common.HTTPVersion;
+import de.hanbei.httpserver.common.Header;
+import de.hanbei.httpserver.common.Method;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
@@ -24,9 +26,10 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 
-import de.hanbei.httpserver.common.*;
-import org.junit.Before;
-import org.junit.Test;
+import static org.hamcrest.collection.IsCollectionContaining.hasItems;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 public class RequestParserTest {
 
@@ -77,13 +80,13 @@ public class RequestParserTest {
         assertEquals(4, acceptMimetypes.size());
         assertThat(acceptMimetypes, hasItems(new Header.Parameter("text/html"),
                 new Header.Parameter("application/xhtml+xml"), new Header.Parameter(
-                "application/xml", 0.9), new Header.Parameter("*/*", 0.8)));
+                "application/xml;q=0.9"), new Header.Parameter("*/*;q=0.8")));
 
         List<Header.Parameter> acceptLanguage = header
                 .getHeaderParameter(Header.Fields.ACCEPT_LANGUAGE);
         assertEquals(2, acceptLanguage.size());
         assertThat(acceptLanguage, hasItems(new Header.Parameter("en-us"),
-                new Header.Parameter("en", 0.5)));
+                new Header.Parameter("en;q=0.5")));
 
         List<Header.Parameter> acceptEncoding = header
                 .getHeaderParameter(Header.Fields.ACCEPT_ENCODING);
@@ -95,7 +98,7 @@ public class RequestParserTest {
                 .getHeaderParameter(Header.Fields.ACCEPT_CHARSET);
         assertEquals(3, acceptCharset.size());
         assertThat(acceptCharset, hasItems(new Header.Parameter("ISO-8859-1"),
-                new Header.Parameter("utf-8", 0.7), new Header.Parameter("*", 0.7)));
+                new Header.Parameter("utf-8;q=0.7"), new Header.Parameter("*;q=0.7")));
 
         List<Header.Parameter> keepAlive = header
                 .getHeaderParameter(Header.Fields.KEEP_ALIVE);
