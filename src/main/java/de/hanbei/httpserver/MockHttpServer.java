@@ -63,6 +63,8 @@ public class MockHttpServer implements Runnable {
         this.port = port;
         timeout = false;
         lock = new Object();
+        stopped = true;
+        isStopping = false;
         predefinedResponses = new HashMap<Method, Mapping<Response>>();
         requestProcessorMapping = new HashMap<Method, Mapping<RequestProcessor>>();
         defaultResponse = Response.notFound().build();
@@ -75,7 +77,9 @@ public class MockHttpServer implements Runnable {
         synchronized ( lock ) {
             listenerThread.start();
             try {
-                lock.wait();
+                while ( stopped ) {
+                    lock.wait();
+                }
             } catch ( InterruptedException e ) {
                 stop();
                 LOGGER.error("Error during startup", e);
@@ -97,7 +101,9 @@ public class MockHttpServer implements Runnable {
             Socket socket = new Socket(serverAddress, this.port);
             socket.close();
             synchronized ( lock ) {
-                lock.wait();
+                while ( !stopped ) {
+                    lock.wait();
+                }
             }
 
         } catch ( ConnectException e ) {
@@ -258,7 +264,7 @@ public class MockHttpServer implements Runnable {
     private Request readRequest(Socket clientSocket) throws IOException {
         synchronized ( lock ) {
             try {
-                lock.wait(100);
+                Thread.sleep(100);
             } catch ( InterruptedException e ) {
                 return null;
             }
