@@ -147,6 +147,7 @@ public class MockHttpServerTest {
 
     @Test
     public void testIsRunning() {
+        assertTrue(this.httpServer.isRunning());
         this.httpServer.stop();
         assertFalse(this.httpServer.isRunning());
     }
