@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Maps a predefined Response or RequestProcessor to a uri relative to the server root.
  */
-public class Mapping<V> {
+class Mapping<V> {
 
     protected Map<String, V> responses;
 
