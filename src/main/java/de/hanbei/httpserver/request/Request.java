@@ -19,6 +19,8 @@ import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Method;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import static de.hanbei.httpserver.common.Header.Fields;
 
@@ -55,6 +57,22 @@ public final class Request {
         this.requestUri = requestUri;
     }
 
+    public List<QueryParameter> getQueryParameter() {
+        List<QueryParameter> queryParameters = new ArrayList<QueryParameter>();
+
+        String queryString = requestUri.getQuery();
+        if (queryString != null) {
+            String[] parameters = queryString.split("&");
+            for (String parameterString : parameters) {
+                String[] parameterSplit = parameterString.split("=");
+                QueryParameter parameter = new QueryParameter(parameterSplit[0], parameterSplit[1]);
+                queryParameters.add(parameter);
+            }
+        }
+
+        return queryParameters;
+    }
+
     public void setVersion(HTTPVersion httpVersion) {
         this.version = httpVersion;
     }
@@ -65,15 +83,15 @@ public final class Request {
 
     @Override
     public String toString() {
-        StringBuffer buffer = new StringBuffer();
-        buffer.append(this.method);
-        buffer.append(" ");
-        buffer.append(this.requestUri);
-        buffer.append(" HTTP/");
-        buffer.append(this.version);
-        buffer.append("\n");
-        buffer.append(header.toString());
-        return buffer.toString();
+        StringBuilder builder = new StringBuilder();
+        builder.append(this.method);
+        builder.append(" ");
+        builder.append(this.requestUri);
+        builder.append(" HTTP/");
+        builder.append(this.version);
+        builder.append("\n");
+        builder.append(header.toString());
+        return builder.toString();
     }
 
     public void setHeader(Header header) {
