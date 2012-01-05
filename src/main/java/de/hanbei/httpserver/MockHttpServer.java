@@ -55,14 +55,13 @@ public class MockHttpServer implements Runnable {
     private CountDownLatch startLatch;
     private CountDownLatch stopLatch;
 
-    //private long startTimeout = 2000;
-
     public MockHttpServer() {
         this(80);
     }
 
     /**
      * Create a new MockHttpServer running on a specific port.
+     *
      * @param port The port the server should run on.
      */
     public MockHttpServer(int port) {
@@ -90,7 +89,7 @@ public class MockHttpServer implements Runnable {
 
         try {
             startLatch.await();
-        } catch (InterruptedException e) {
+        } catch ( InterruptedException e ) {
             stop();
             LOGGER.error("Error during startup", e);
         }
@@ -100,12 +99,12 @@ public class MockHttpServer implements Runnable {
      * Stop the server.
      */
     public void stop() {
-        if (!isRunning()) {
+        if ( !isRunning() ) {
             return;
         }
         isStopping = true;
         try {
-            if (this.serverSocket == null || this.serverSocket.isClosed()) {
+            if ( this.serverSocket == null || this.serverSocket.isClosed() ) {
                 return;
             }
             InetAddress serverAddress = this.serverSocket.getInetAddress();
@@ -113,16 +112,16 @@ public class MockHttpServer implements Runnable {
             socket.close();
 
             stopLatch.await();
-        } catch (ConnectException e) {
+        } catch ( ConnectException e ) {
             try {
                 LOGGER.info("Could not send close request. But server socket is not waiting, just closing it.");
                 serverSocket.close();
-            } catch (IOException e1) {
+            } catch ( IOException e1 ) {
                 LOGGER.warn("Error while stopping server", e);
             }
-        } catch (IOException e) {
+        } catch ( IOException e ) {
             LOGGER.warn("Error while stopping server", e);
-        } catch (InterruptedException e) {
+        } catch ( InterruptedException e ) {
             LOGGER.warn("Error while stopping server", e);
         }
     }
@@ -169,10 +168,6 @@ public class MockHttpServer implements Runnable {
      * @return true if the server is already running.
      */
     public boolean isRunning() {
-        //        if ( this.serverSocket == null ) {
-        //            return !this.stopped;
-        //        }
-        //        return !this.serverSocket.isClosed();
         return !this.stopped;
     }
 
@@ -189,18 +184,18 @@ public class MockHttpServer implements Runnable {
 
             startLatch.countDown();
 
-            while (!MockHttpServer.this.isStopping) {
+            while ( !MockHttpServer.this.isStopping ) {
                 Socket clientSocket = MockHttpServer.this.serverSocket.accept();
                 handle(clientSocket);
             }
-        } catch (IOException e) {
+        } catch ( IOException e ) {
             throw new ServerErrorException("Something went wrong during reading from the socket.", e);
         } finally {
             try {
-                if (serverSocket != null) {
+                if ( serverSocket != null ) {
                     this.serverSocket.close();
                 }
-            } catch (IOException e) {
+            } catch ( IOException e ) {
                 LOGGER.error("Error while closing socket", e);
             }
             this.stopped = true;
@@ -210,47 +205,47 @@ public class MockHttpServer implements Runnable {
 
     private void handle(Socket clientSocket) {
         try {
-            if (!shouldHandleRequest(clientSocket)) {
+            if ( !shouldHandleRequest(clientSocket) ) {
                 return;
             }
 
             Request request = readRequest(clientSocket);
 
-            if (request == null || request.isEmpty()) {
+            if ( request == null || request.isEmpty() ) {
                 LOGGER.warn("No Request");
                 return;
             }
 
-            if (timeout) {
+            if ( timeout ) {
                 return;
             }
 
 
             RequestProcessor processor = getProcessor(request);
             Response response;
-            if (processor != null) {
+            if ( processor != null ) {
                 response = processor.process(request);
             } else {
                 response = getResponse(request);
             }
 
             sendResponse(response, clientSocket);
-        } catch (IOException e) {
+        } catch ( IOException e ) {
             LOGGER.warn("", e);
         } finally {
             try {
                 clientSocket.close();
-            } catch (IOException e) {
+            } catch ( IOException e ) {
                 LOGGER.warn("", e);
             }
         }
     }
 
     private boolean shouldHandleRequest(Socket clientSocket) {
-        if (isStopping) {
+        if ( isStopping ) {
             return false;
         }
-        if (clientSocket.isClosed()) {
+        if ( clientSocket.isClosed() ) {
             return false;
         }
         return true;
@@ -260,7 +255,7 @@ public class MockHttpServer implements Runnable {
         String requestUri = trimSlashes(request.getRequestUri());
         Mapping<RequestProcessor> mapping = requestProcessorMapping.get(request.getMethod());
         RequestProcessor processor = null;
-        if (mapping != null) {
+        if ( mapping != null ) {
             processor = mapping.get(requestUri);
         }
         return processor;
@@ -269,11 +264,11 @@ public class MockHttpServer implements Runnable {
     private Response getResponse(Request request) {
         String requestUri = trimSlashes(request.getRequestUri());
         Mapping<Response> mapping = predefinedResponses.get(request.getMethod());
-        if (mapping == null) {
+        if ( mapping == null ) {
             return defaultResponse;
         }
         Response response = mapping.get(requestUri);
-        if (response == null) {
+        if ( response == null ) {
             return defaultResponse;
         }
         return response;
@@ -282,7 +277,7 @@ public class MockHttpServer implements Runnable {
     private Request readRequest(Socket clientSocket) throws IOException {
         try {
             Thread.sleep(100);
-        } catch (InterruptedException e) {
+        } catch ( InterruptedException e ) {
             return null;
         }
         RequestParser requestParser = new RequestParser();
@@ -303,6 +298,7 @@ public class MockHttpServer implements Runnable {
      * MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI, de.hanbei.httpserver.response.Response)}.
      *
      * @return The default response.
+     *
      * @see MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI, de.hanbei.httpserver.response.Response)
      */
     public Response getDefaultResponse() {
@@ -318,34 +314,27 @@ public class MockHttpServer implements Runnable {
         this.defaultResponse = defaultResponse;
     }
 
-    /**
-     * Get the maximum time the server is allowed to take for startup.
-     *
-     * @return The maximum time the server is allowed to take for startup.
-     */
-    //public long getStartTimeout() {
-    //    return startTimeout;
-    //}
 
     /**
-     * Set the maximum time the server is allowed to take for startup.
+     * Add a specified response for a certain url and the GET method. The uri has to be relative to the server url.
      *
-     * @param startTimeout The maximum time the server is allowed to take for startup.
+     * @param uri The uri the request will access on. Has to be relative to the server url.
+     * @param response The response that should be sent on a request on the specified uri with the specified method.
      */
-    //public void setStartTimeout(long startTimeout) {
-    //    this.startTimeout = startTimeout;
-    //}
+    public void addResponse(URI uri, Response response) {
+        addResponse(Method.GET, uri, response);
+    }
 
     /**
      * Add a specified response for a certain url and method. The uri has to be relative to the server url.
      *
-     * @param method   The method the response should be sent on.
-     * @param uri      The uri the request will access on. Has to be relative to the server url.
+     * @param method The method the response should be sent on.
+     * @param uri The uri the request will access on. Has to be relative to the server url.
      * @param response The response that should be sent on a request on the specified uri with the specified method.
      */
     public void addResponse(Method method, URI uri, Response response) {
         Mapping<Response> mapping = predefinedResponses.get(method);
-        if (mapping == null) {
+        if ( mapping == null ) {
             mapping = new Mapping<Response>();
             predefinedResponses.put(method, mapping);
         }
@@ -356,13 +345,13 @@ public class MockHttpServer implements Runnable {
      * Add a {@link RequestProcessor} for a certain url and a method. It should make sense only POST and PUT requests as these are the only
      * ones that have a request body.
      *
-     * @param method    The method the response should be sent on.
-     * @param uri       The uri the request will access on. Has to be relative to the server url.
+     * @param method The method the response should be sent on.
+     * @param uri The uri the request will access on. Has to be relative to the server url.
      * @param processor The {@link RequestProcessor} that processes the request body.
      */
     public void addRequestProcessor(Method method, URI uri, RequestProcessor processor) {
         Mapping<RequestProcessor> mapping = this.requestProcessorMapping.get(method);
-        if (mapping == null) {
+        if ( mapping == null ) {
             mapping = new Mapping<RequestProcessor>();
             requestProcessorMapping.put(method, mapping);
         }
@@ -379,7 +368,7 @@ public class MockHttpServer implements Runnable {
         server.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
             @Override
             public Response process(Request request) {
-                if ("Test".equals(request.getContent().getContentAsString())) {
+                if ( "Test".equals(request.getContent().getContentAsString()) ) {
                     return Response.ok().build();
                 } else {
                     return Response.status(Status.UNAUTHORIZED).build();
