@@ -129,10 +129,22 @@ public final class Response {
         return status(Status.OK);
     }
 
+    /**
+     * Create a response that represents a 201 - Created. Additional information can be set via the returned {@link
+     * ResponseBuilder} class.
+     *
+     * @return A ResponseBuilder with a base response initialized on 201 - Created.
+     */
+    public static ResponseBuilder created() {
+        return status(Status.CREATED);
+    }
+
 
     /**
      * Create a response that represents some status. Additional information can be set via the returned {@link
      * ResponseBuilder} class.
+     *
+     * @param status The status code to send as response.
      *
      * @return A ResponseBuilder with a base response initialized on <code>status</code>.
      */
