@@ -22,6 +22,7 @@ import de.hanbei.httpserver.request.RequestParser;
 import de.hanbei.httpserver.response.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.misc.MessageUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -291,6 +292,8 @@ public class MockHttpServer implements Runnable {
         out.write(response.toString());
         out.write("\n");
         out.close();
+        outputStream.flush();
+        outputStream.close();
     }
 
     /**
