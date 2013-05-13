@@ -13,20 +13,25 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver.response;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+
+import org.apache.commons.io.Charsets;
+
 import de.hanbei.httpserver.common.HTTPVersion;
 import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Status;
 import de.hanbei.httpserver.exceptions.ContentException;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.URI;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-
-/** Builder Pattern implementation for building responses. */
+/**
+ * Builder Pattern implementation for building responses.
+ */
 public class ResponseBuilder {
 
     private static final String TEXT_PLAIN = "text/plain";
@@ -107,7 +112,20 @@ public class ResponseBuilder {
      * @return A ResponseBuilder to add additional information.
      */
     public ResponseBuilder content(String content) {
-        content(content.getBytes());
+        content(content, Charsets.UTF_8);
+        return this;
+    }
+
+    /**
+     * Set the content as a String. The content length is induced from the string length
+     *
+     * @param content The content as as a string.
+     * @return A ResponseBuilder to add additional information.
+     */
+    public ResponseBuilder content(String content, Charset charset) {
+        content(content.getBytes(charset));
+        response.getContent().setCharset(charset.name());
+        response.getContent().setString(true);
         return this;
     }
 
@@ -120,19 +138,20 @@ public class ResponseBuilder {
     public ResponseBuilder content(byte[] content) {
         response.getContent().setContent(content);
         response.getContent().setLength(content.length);
+        response.getContent().setString(false);
         return this;
     }
 
     public ResponseBuilder expires(Date expires) {
         response.getHeader().addParameter(Header.Fields.EXPIRES,
-                dateFormat.format(expires));
+            dateFormat.format(expires));
         return this;
     }
 
     /**
      * Add a header field to the response.
      *
-     * @param name  The name of the header field.
+     * @param name The name of the header field.
      * @param value The value of the header field.
      * @return A ResponseBuilder to add additional information.
      */
@@ -160,7 +179,7 @@ public class ResponseBuilder {
      */
     public ResponseBuilder lastModified(Date lastModified) {
         response.getHeader().addParameter(Header.Fields.LAST_MODIFIED,
-                dateFormat.format(lastModified));
+            dateFormat.format(lastModified));
         return this;
     }
 

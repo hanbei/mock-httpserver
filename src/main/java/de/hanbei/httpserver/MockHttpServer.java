@@ -13,20 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver;
 
-
-import de.hanbei.httpserver.common.Method;
-import de.hanbei.httpserver.common.Status;
-import de.hanbei.httpserver.exceptions.ServerErrorException;
-import de.hanbei.httpserver.request.Request;
-import de.hanbei.httpserver.request.RequestParser;
-import de.hanbei.httpserver.response.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import sun.misc.MessageUtils;
-
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -35,6 +23,18 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.hanbei.httpserver.common.Method;
+import de.hanbei.httpserver.common.Status;
+import de.hanbei.httpserver.exceptions.ServerErrorException;
+import de.hanbei.httpserver.request.Request;
+import de.hanbei.httpserver.request.RequestParser;
+import de.hanbei.httpserver.response.Response;
+import de.hanbei.httpserver.response.ResponseWriter;
 
 public class MockHttpServer implements Runnable {
 
@@ -114,16 +114,13 @@ public class MockHttpServer implements Runnable {
 
             stopLatch.await();
         } catch ( ConnectException e ) {
-            try {
-                LOGGER.info("Could not send close request. But server socket is not waiting, just closing it.");
-                serverSocket.close();
-            } catch ( IOException e1 ) {
-                LOGGER.warn("Error while stopping server", e);
-            }
+            LOGGER.info("Could not send close request. But server socket is not waiting, just closing it.");
         } catch ( IOException e ) {
             LOGGER.warn("Error while stopping server", e);
         } catch ( InterruptedException e ) {
             LOGGER.warn("Error while stopping server", e);
+        } finally {
+            IOUtils.closeQuietly(serverSocket);
         }
     }
 
@@ -179,8 +176,8 @@ public class MockHttpServer implements Runnable {
         try {
             this.serverSocket = new ServerSocket(MockHttpServer.this.port);
             LOGGER.info("Started server on {}:{}",
-                    MockHttpServer.this.serverSocket.getInetAddress(),
-                    MockHttpServer.this.serverSocket.getLocalPort());
+                MockHttpServer.this.serverSocket.getInetAddress(),
+                MockHttpServer.this.serverSocket.getLocalPort());
             this.stopped = false;
 
             startLatch.countDown();
@@ -192,12 +189,8 @@ public class MockHttpServer implements Runnable {
         } catch ( IOException e ) {
             throw new ServerErrorException("Something went wrong during reading from the socket.", e);
         } finally {
-            try {
-                if ( serverSocket != null ) {
-                    this.serverSocket.close();
-                }
-            } catch ( IOException e ) {
-                LOGGER.error("Error while closing socket", e);
+            if ( serverSocket != null ) {
+                IOUtils.closeQuietly(this.serverSocket);
             }
             this.stopped = true;
             stopLatch.countDown();
@@ -221,7 +214,6 @@ public class MockHttpServer implements Runnable {
                 return;
             }
 
-
             RequestProcessor processor = getProcessor(request);
             Response response;
             if ( processor != null ) {
@@ -230,7 +222,7 @@ public class MockHttpServer implements Runnable {
                 response = getResponse(request);
             }
 
-            sendResponse(response, clientSocket);
+            sendResponse(response, request, clientSocket);
         } catch ( IOException e ) {
             LOGGER.warn("", e);
         } finally {
@@ -285,15 +277,12 @@ public class MockHttpServer implements Runnable {
         return requestParser.parse(clientSocket.getInputStream());
     }
 
-    private void sendResponse(Response response, Socket clientSocket) throws IOException {
-        String charset = response.getContent().getCharset();
+    private void sendResponse(Response response, Request request, Socket clientSocket) throws IOException {
         OutputStream outputStream = clientSocket.getOutputStream();
-        OutputStreamWriter out = new OutputStreamWriter(outputStream, charset);
-        out.write(response.toString());
-        out.write("\n");
-        out.close();
-        outputStream.flush();
-        outputStream.close();
+
+        ResponseWriter responseWriter = new ResponseWriter(outputStream, request);
+        responseWriter.write(response);
+        responseWriter.close();
     }
 
     /**
@@ -301,7 +290,6 @@ public class MockHttpServer implements Runnable {
      * MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI, de.hanbei.httpserver.response.Response)}.
      *
      * @return The default response.
-     *
      * @see MockHttpServer#addResponse(de.hanbei.httpserver.common.Method, java.net.URI, de.hanbei.httpserver.response.Response)
      */
     public Response getDefaultResponse() {
@@ -316,7 +304,6 @@ public class MockHttpServer implements Runnable {
     public void setDefaultResponse(Response defaultResponse) {
         this.defaultResponse = defaultResponse;
     }
-
 
     /**
      * Add a specified response for a certain url and the GET method. The uri has to be relative to the server url.

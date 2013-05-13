@@ -40,6 +40,7 @@ public class Content {
     private String md5;
 
     private String range;
+    private boolean string;
 
     public String getMimetype() {
         return mimetype;
@@ -56,7 +57,7 @@ public class Content {
 
     private String getCharset(String mimetype) {
         String[] charset = mimetype.split(";");
-        if ( charset.length > 1) {
+        if ( charset.length > 1 ) {
             return charset[1].split("=")[1];
         }
         return UTF8_ENCODING;
@@ -71,6 +72,9 @@ public class Content {
     }
 
     public byte[] getContent() {
+        if ( length < 0 ) {
+            return new byte[0];
+        }
         byte[] result = new byte[content.length];
         System.arraycopy(content, 0, result, 0, content.length);
         return result;
@@ -185,5 +189,13 @@ public class Content {
 
     public void setCharset(String charset) {
         this.charset = charset;
+    }
+
+    public void setString(boolean string) {
+        this.string = string;
+    }
+
+    public boolean isString() {
+        return string;
     }
 }

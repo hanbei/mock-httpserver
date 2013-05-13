@@ -34,6 +34,7 @@ public final class Response {
     private Content content;
 
     private Response() {
+        // not needed
     }
 
     private Response(Status status) {
@@ -151,4 +152,5 @@ public final class Response {
     public static ResponseBuilder status(Status status) {
         return new ResponseBuilder(new Response(status));
     }
+
 }

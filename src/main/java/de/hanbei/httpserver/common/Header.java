@@ -85,25 +85,25 @@ public class Header {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) {
+            if ( this == obj ) {
                 return true;
             }
-            if (obj == null) {
+            if ( obj == null ) {
                 return false;
             }
-            if (getClass() != obj.getClass()) {
+            if ( getClass() != obj.getClass() ) {
                 return false;
             }
             Parameter other = (Parameter) obj;
-            if (Double.doubleToLongBits(quality) != Double
-                    .doubleToLongBits(other.quality)) {
+            if ( Double.doubleToLongBits(quality) != Double
+                .doubleToLongBits(other.quality) ) {
                 return false;
             }
-            if (value == null) {
-                if (other.value != null) {
+            if ( value == null ) {
+                if ( other.value != null ) {
                     return false;
                 }
-            } else if (!value.equals(other.value)) {
+            } else if ( !value.equals(other.value) ) {
                 return false;
             }
             return true;
@@ -127,7 +127,7 @@ public class Header {
 
         @Override
         public String toString() {
-            if (Math.abs(quality + 1) < EPSILON) {
+            if ( Math.abs(quality + 1) < EPSILON ) {
                 return value;
             }
             return value + ";q=" + quality;
@@ -146,26 +146,26 @@ public class Header {
     @Override
     public String toString() {
         StringBuffer buffer = new StringBuffer();
-        if (!fields.isEmpty()) {
-            for (String parameterKey : fields.keySet()) {
+        if ( !fields.isEmpty() ) {
+            for ( String parameterKey : fields.keySet() ) {
                 buffer.append(parameterKey);
                 buffer.append(": ");
                 List<Parameter> parameterList = fields.get(parameterKey);
                 String delim = "";
-                for (Parameter p : parameterList) {
+                for ( Parameter p : parameterList ) {
                     buffer.append(delim).append(p);
                     delim = ",";
                 }
                 buffer.append("\n");
             }
         }
-        if (!cookies.isEmpty()) {
+        if ( !cookies.isEmpty() ) {
             buffer.append(Header.Fields.COOKIE);
             buffer.append(": ");
             String delim = "";
-            for (Cookie cookie : cookies) {
+            for ( Cookie cookie : cookies ) {
                 buffer.append(delim).append(cookie.getName()).append("=")
-                        .append(cookie.getValue());
+                      .append(cookie.getValue());
                 delim = "; ";
             }
         }
@@ -181,13 +181,17 @@ public class Header {
     }
 
     public List<Parameter> getHeaderParameter(String field) {
-        return new ArrayList<Parameter>(fields.get(field));
+        List<Parameter> parameters = fields.get(field);
+        if ( parameters == null ) {
+            return Collections.emptyList();
+        }
+        return new ArrayList<Parameter>(parameters);
     }
 
     public List<String> getHeaderValues(String field) {
         List<Parameter> list = fields.get(field);
         List<String> values = new ArrayList<String>();
-        for (Parameter p : list) {
+        for ( Parameter p : list ) {
             values.add(p.getValue());
         }
         return values;
