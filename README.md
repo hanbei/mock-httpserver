@@ -8,19 +8,21 @@ Starting and stopping the mock-httpserver
 
 Assuming we start the mock-httpserver in the `setUp` method and stop it in the `tearDown` method the code would be:
 
-    @Before
-    public void setUp() {
-      mockHttpServer = new MockHttpServer(8888);
-      mockHttpServer.start();
-    }
-  
+```java
+@Before
+public void setUp() {
+  mockHttpServer = new MockHttpServer(8888);
+  mockHttpServer.start();
+}
+```  
 This starts a mock-httpserver on port 8888. To shut it down call the `stop` method of the mock-httpserver.
 
-    @After
-    public void tearDown() {
-      mockHttpServer.stop();
-    }
-
+```java
+@After
+public void tearDown() {
+  mockHttpServer.stop();
+}
+```
 
 How to define responses
 -----------------------
