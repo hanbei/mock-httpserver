@@ -35,7 +35,7 @@ For example to create a response that returns a HTTP status code of 200 and some
 Response response = Response.ok().type("application/json").content("{\"some\":\"json\}").build();
 ```
 
-To tell the mock httpserver to return this response one a GET request to `/some/json` do it like this.
+To tell the mock httpserver to return this response one a GET request to `http://localhost:8888/some/json` do it like this.
 
 ```java
 mockHttpServer.addResponse(Method.GET, URI.create("/some/json"), response);
