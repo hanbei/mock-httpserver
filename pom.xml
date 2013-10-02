@@ -5,6 +5,7 @@
     <artifactId>mock-httpserver</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>MockHttpServer</name>
+    <url>https://github.com/hanbei/mock-httpserver</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -48,6 +49,34 @@
         </dependency>
     </dependencies>
 
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>fschulz</id>
+            <name>Florian Schulz</name>
+            <email>florian.schulz@hanbei.de</email>
+            <url>http://github.com/hanbei</url>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/hanbei/mock-httpserver/issues</url>
+    </issueManagement>
+
+    <scm>
+        <connection>scm:git:git@github.com:hanbei/mock-httpserver.git</connection>
+        <developerConnection>scm:git:git@github.com:hanbei/mock-httpserver.git</developerConnection>
+        <url>https://github.com/hanbei/mock-httpserver.git</url>
+    </scm>
+
     <build>
         <plugins>
             <plugin>
@@ -66,6 +95,20 @@
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.4.1</version>
+            </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>local_github</id>
+            <name>Github (Local)</name>
+            <url>file:///home/hanbei/projects/mvn-repo</url>
+            <layout>default</layout>
+        </repository>
+    </distributionManagement>
 </project>
