@@ -79,3 +79,22 @@ mockHttpServer.addRequestProcessor(Method.GET, URI.create("some/post"), new Requ
 
 assertTrue(headerValues.contains("Mozilla..."));
 ```
+
+Maven
+-----
+To include the mock-httpserver as a maven dependency into your project you need to add the following repository to your pom.xml
+
+```
+<repositories>
+   <repository>
+     <id>de.hanbei</id>
+     <url>https://raw.github.com/hanbei/mvn-repo/master</url>
+   </repository>
+ </repositories>
+```
+and include it via this maven coordinates.
+```
+<groupId>de.hanbei</groupId>
+<artifactId>mock-httpserver</artifactId>
+<version>1.0.0</version>
+```
