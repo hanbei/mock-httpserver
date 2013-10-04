@@ -67,12 +67,12 @@ Be careful to always send a response back. If you need to assert certain request
 
 ```java
 ...
-final List<String> headerValues;
+List<String> headerValues;
 
 mockHttpServer.addRequestProcessor(Method.GET, URI.create("some/post"), new RequestProcessor() {
   @Override
   public Response process(Request request) {
-    headerValues = List<String> headers = request.getHeader().getHeaderValues(Header.Fields.USER_AGENT);
+    headerValues = request.getHeader().getHeaderValues(Header.Fields.USER_AGENT);
     Response.ok().build();
   }
 });
