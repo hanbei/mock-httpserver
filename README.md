@@ -55,9 +55,9 @@ mockHttpServer.addRequestProcessor(Method.POST, URI.create("some/post"), new Req
   public Response process(Request request) {
     List<String> headers = request.getHeader().getHeaderValues(Header.Fields.USER_AGENT);
     if(headers.contains("Mozilla...")) {
-      Response.ok().build();
+      return Response.ok().build();
     } else {
-      Response.status(Status.UNAUTHORIZED).build();
+      return Response.status(Status.UNAUTHORIZED).build();
     }
   }
 });
