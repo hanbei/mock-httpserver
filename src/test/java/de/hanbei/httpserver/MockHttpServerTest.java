@@ -13,15 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver;
 
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.net.URI;
-
+import de.hanbei.httpserver.common.Method;
+import de.hanbei.httpserver.common.Status;
+import de.hanbei.httpserver.request.Request;
+import de.hanbei.httpserver.response.Response;
 import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -37,10 +32,14 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.hanbei.httpserver.common.Method;
-import de.hanbei.httpserver.common.Status;
-import de.hanbei.httpserver.request.Request;
-import de.hanbei.httpserver.response.Response;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URI;
+
+import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class MockHttpServerTest {
 
@@ -51,17 +50,17 @@ public class MockHttpServerTest {
     public void setUp() throws Exception {
         this.httpServer = new MockHttpServer(7001);
         this.httpServer.start();
-        httpServer.addResponse(Method.GET, new URI("/test"), Response.ok().build());
-        httpServer.addResponse(Method.GET, new URI("/test3"), Response.ok().content("TestContent").build());
-        httpServer.addResponse(Method.GET, new URI("/test2"), Response.status(Status.NOT_FOUND).build());
-        httpServer.addResponse(Method.GET, new URI("/test4"), Response.ok().content(new byte[]{1, 2, 3, 4, 5}).build());
-        httpServer.addResponse(Method.GET, new URI("/testUtf8"),
-            Response.ok().content("Cæelo", Charsets.ISO_8859_1).type("text/plain; charset=iso-8859-1").build());
+        httpServer.httpHandler.addResponse(Method.GET, new URI("/test"), Response.ok().build());
+        httpServer.httpHandler.addResponse(Method.GET, new URI("/test3"), Response.ok().content("TestContent").build());
+        httpServer.httpHandler.addResponse(Method.GET, new URI("/test2"), Response.status(Status.NOT_FOUND).build());
+        httpServer.httpHandler.addResponse(Method.GET, new URI("/test4"), Response.ok().content(new byte[]{1, 2, 3, 4, 5}).build());
+        httpServer.httpHandler.addResponse(Method.GET, new URI("/testUtf8"),
+                Response.ok().content("Cæelo", Charsets.ISO_8859_1).type("text/plain; charset=iso-8859-1").build());
 
         httpServer.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
             @Override
             public Response process(Request request) {
-                if ( request.getContent().getContentAsString().equals("Test") ) {
+                if (request.getContent().getContentAsString().equals("Test")) {
                     return Response.ok().build();
                 } else {
                     return Response.status(Status.UNAUTHORIZED).build();
@@ -108,7 +107,7 @@ public class MockHttpServerTest {
 
     @Test(expected = NoHttpResponseException.class)
     public void testTimeout() throws IOException {
-        httpServer.setTimeout(true);
+        httpServer.httpHandler.setTimeout(true);
         HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet("http://localhost:7001/timeout");
         httpclient.execute(httpget);
