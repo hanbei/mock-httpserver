@@ -22,43 +22,46 @@ import static org.junit.Assert.assertEquals;
 
 public class HeaderTest {
 
-	private Header header;
+    private Header header;
 
-	@Before
-	public void setUp() throws Exception {
-		this.header = new Header();
-		this.header.addParameter("Accept", new Header.Parameter("text/xml"));
-		this.header.addParameter("Accept", new Header.Parameter("text/html", 0.1));
+    @Before
+    public void setUp() throws Exception {
+        this.header = new Header();
+        this.header.addParameter("Accept", new Header.Parameter("text/xml"));
+        this.header.addParameter("Accept", new Header.Parameter("text/html", 0.1));
 
-		this.header.addParameter("Accept-Language", new Header.Parameter("en", 0.1));
-		this.header
-				.addParameter("Accept-Language", new Header.Parameter("en-us", 0.5));
+        this.header.addParameter("Accept-Language", new Header.Parameter("en", 0.1));
+        this.header
+                .addParameter("Accept-Language", new Header.Parameter("en-us", 0.5));
 
-		this.header.addParameter("Accept-Encoding", new Header.Parameter("gzip"));
-		this.header.addParameter("Accept-Encoding", new Header.Parameter("deflate"));
+        this.header.addParameter("Accept-Encoding", new Header.Parameter("gzip"));
+        this.header.addParameter("Accept-Encoding", new Header.Parameter("deflate"));
 
-		this.header.addParameter("Accept-Charset", "ISO-8859-1");
-		this.header.addParameter("Accept-Charset", "utf-8", 0.7);
-		this.header.addParameter("Accept-Charset", "*", 0.7);
+        this.header.addParameter("Accept-Charset", "ISO-8859-1");
+        this.header.addParameter("Accept-Charset", "utf-8", 0.7);
+        this.header.addParameter("Accept-Charset", "*", 0.7);
 
-	}
+    }
 
-	@Test
-	public void testToString() {
-		assertEquals("Accept-Language: en;q=0.1,en-us;q=0.5\n"
-				+ "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\n"
-				+ "Accept-Encoding: gzip,deflate\n"
-				+ "Accept: text/xml,text/html;q=0.1\n", header.toString());
-	}
+    @Test
+    public void testToString() {
+        assertEquals(""
+                + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\n"
+                + "Accept: text/xml,text/html;q=0.1\n"
+                + "Accept-Language: en;q=0.1,en-us;q=0.5\n"
+                + "Accept-Encoding: gzip,deflate\n"
+                , header.toString());
+    }
 
-	@Test
-	public void testToStringWithCookie() {
-		this.header.addCookie(new Cookie("test", "test"));
-		this.header.addCookie(new Cookie("test2", "test2"));
-		assertEquals("Accept-Language: en;q=0.1,en-us;q=0.5\n"
-				+ "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\n"
-				+ "Accept-Encoding: gzip,deflate\n"
-				+ "Accept: text/xml,text/html;q=0.1\n"
-				+ "Cookie: test=test; test2=test2", header.toString());
-	}
+    @Test
+    public void testToStringWithCookie() {
+        this.header.addCookie(new Cookie("test", "test"));
+        this.header.addCookie(new Cookie("test2", "test2"));
+        assertEquals(""
+                + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\n"
+                + "Accept: text/xml,text/html;q=0.1\n"
+                + "Accept-Language: en;q=0.1,en-us;q=0.5\n"
+                + "Accept-Encoding: gzip,deflate\n"
+                + "Cookie: test=test; test2=test2", header.toString());
+    }
 }

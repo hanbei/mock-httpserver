@@ -5,25 +5,24 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Method;
+import de.hanbei.httpserver.exceptions.ServerErrorException;
 import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.response.Response;
-import de.hanbei.httpserver.response.ResponseWriter;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.Socket;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
 import static java.lang.Math.max;
 
-/**
- * Created by hanbei on 10/12/14.
- */
 public class MockHttpHandler implements HttpHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(MockHttpHandler.class);
 
     private Map<Method, Mapping<Response>> predefinedResponses;
     private Map<Method, Mapping<RequestProcessor>> requestProcessorMapping;
@@ -44,16 +43,14 @@ public class MockHttpHandler implements HttpHandler {
 
         Response response = getResponse(requestURI, method);
 
-        Mapping<RequestProcessor> processorMapping = requestProcessorMapping.get(method);
-        if (processorMapping != null) {
-            RequestProcessor requestProcessor = processorMapping.get(trimSlashes(requestURI));
-            if (requestProcessor != null) {
-                try {
-                    Request request = portRequest(httpExchange);
-                    response = requestProcessor.process(request);
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
+        RequestProcessor processor = getProcessor(method, requestURI);
+
+        if (processor != null) {
+            try {
+                Request request = portRequest(httpExchange);
+                response = processor.process(request);
+            } catch (Exception e) {
+                throw new ServerErrorException("Error in porting requests", e);
             }
         }
 
@@ -62,8 +59,8 @@ public class MockHttpHandler implements HttpHandler {
                 sendHeaders(httpExchange, response);
                 sendContent(httpExchange, response);
             }
-        } catch (Throwable t) {
-            t.printStackTrace();
+        } catch (Exception e) {
+            throw new ServerErrorException("Error sending the response", e);
         } finally {
             httpExchange.close();
         }
@@ -146,11 +143,6 @@ public class MockHttpHandler implements HttpHandler {
         this.defaultResponse = defaultResponse;
     }
 
-    private String trimSlashes(URI uri) {
-        String uriString = uri.toString();
-        return uriString.replaceAll("^/|/$", "");
-    }
-
     /**
      * Add a specified response for a certain url and method. The uri has to be relative to the server url.
      *
@@ -167,23 +159,19 @@ public class MockHttpHandler implements HttpHandler {
         mapping.add(trimSlashes(uri), response);
     }
 
-    private RequestProcessor getProcessor(Request request) {
-//        String requestUri = trimSlashes(request.getRequestUri());
-//        Mapping<RequestProcessor> mapping = requestProcessorMapping.get(request.getMethod());
-//        RequestProcessor processor = null;
-//        if (mapping != null) {
-//            processor = mapping.get(requestUri);
-//        }
-//        return processor;
-        return null;
+    private RequestProcessor getProcessor(Method method, URI requestUriP) {
+        String requestUri = trimSlashes(requestUriP);
+        Mapping<RequestProcessor> mapping = requestProcessorMapping.get(method);
+        RequestProcessor processor = null;
+        if (mapping != null) {
+            processor = mapping.get(requestUri);
+        }
+        return processor;
     }
 
-    private void sendResponse(Response response, Request request, Socket clientSocket) throws IOException {
-        OutputStream outputStream = clientSocket.getOutputStream();
-
-        ResponseWriter responseWriter = new ResponseWriter(outputStream, request);
-        responseWriter.write(response);
-        responseWriter.close();
+    private String trimSlashes(URI uri) {
+        String uriString = uri.toString();
+        return uriString.replaceAll("^/|/$", "");
     }
 
     /**
