@@ -30,7 +30,7 @@ public class MockHttpServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockHttpServer.class);
     private final int port;
-    MockHttpHandler httpHandler;
+    private MockHttpHandler httpHandler;
     private HttpServer server;
     private boolean running;
 
@@ -118,7 +118,8 @@ public class MockHttpServer {
 
 
     /**
-     * Get the default response the server should send on any request that is not specified via {@link
+     * Get the default response the server should send on any request that is not specified via
+     * addResponse or addRequestProcessor.
      *
      * @return The default response.
      */

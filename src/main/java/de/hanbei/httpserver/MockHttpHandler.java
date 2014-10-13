@@ -9,8 +9,6 @@ import de.hanbei.httpserver.exceptions.ServerErrorException;
 import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.response.Response;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -20,9 +18,7 @@ import java.util.Map;
 
 import static java.lang.Math.max;
 
-public class MockHttpHandler implements HttpHandler {
-
-    private static final Logger logger = LoggerFactory.getLogger(MockHttpHandler.class);
+class MockHttpHandler implements HttpHandler {
 
     private Map<Method, Mapping<Response>> predefinedResponses;
     private Map<Method, Mapping<RequestProcessor>> requestProcessorMapping;

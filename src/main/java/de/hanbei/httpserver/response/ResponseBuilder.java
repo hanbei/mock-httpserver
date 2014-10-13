@@ -13,6 +13,12 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 package de.hanbei.httpserver.response;
 
+import de.hanbei.httpserver.common.HTTPVersion;
+import de.hanbei.httpserver.common.Header;
+import de.hanbei.httpserver.common.Status;
+import de.hanbei.httpserver.exceptions.ContentException;
+import org.apache.commons.io.Charsets;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -22,22 +28,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.apache.commons.io.Charsets;
-
-import de.hanbei.httpserver.common.HTTPVersion;
-import de.hanbei.httpserver.common.Header;
-import de.hanbei.httpserver.common.Status;
-import de.hanbei.httpserver.exceptions.ContentException;
-
 /**
  * Builder Pattern implementation for building responses.
  */
 public class ResponseBuilder {
 
     private static final String TEXT_PLAIN = "text/plain";
-    private Response response;
-
     private final SimpleDateFormat dateFormat;
+    private Response response;
 
     ResponseBuilder(Response response) {
         this.response = response;
@@ -98,7 +96,7 @@ public class ResponseBuilder {
         try {
             ObjectOutputStream objectOut = new ObjectOutputStream(bytes);
             objectOut.writeObject(content);
-        } catch ( IOException e ) {
+        } catch (IOException e) {
             throw new ContentException(e);
         }
         content(bytes.toByteArray());
@@ -120,6 +118,7 @@ public class ResponseBuilder {
      * Set the content as a String. The content length is induced from the string length
      *
      * @param content The content as as a string.
+     * @param charset The character set the content should be encoded in.
      * @return A ResponseBuilder to add additional information.
      */
     public ResponseBuilder content(String content, Charset charset) {
@@ -144,14 +143,14 @@ public class ResponseBuilder {
 
     public ResponseBuilder expires(Date expires) {
         response.getHeader().addParameter(Header.Fields.EXPIRES,
-            dateFormat.format(expires));
+                dateFormat.format(expires));
         return this;
     }
 
     /**
      * Add a header field to the response.
      *
-     * @param name The name of the header field.
+     * @param name  The name of the header field.
      * @param value The value of the header field.
      * @return A ResponseBuilder to add additional information.
      */
@@ -179,7 +178,7 @@ public class ResponseBuilder {
      */
     public ResponseBuilder lastModified(Date lastModified) {
         response.getHeader().addParameter(Header.Fields.LAST_MODIFIED,
-            dateFormat.format(lastModified));
+                dateFormat.format(lastModified));
         return this;
     }
 

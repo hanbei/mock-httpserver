@@ -50,14 +50,14 @@ public class MockHttpServerTest {
     public void setUp() throws Exception {
         this.httpServer = new MockHttpServer(7001);
         this.httpServer.start();
-        httpServer.httpHandler.addResponse(Method.GET, new URI("/test"), Response.ok().build());
-        httpServer.httpHandler.addResponse(Method.GET, new URI("/test3"), Response.ok().content("TestContent").build());
-        httpServer.httpHandler.addResponse(Method.GET, new URI("/test2"), Response.status(Status.NOT_FOUND).build());
-        httpServer.httpHandler.addResponse(Method.GET, new URI("/test4"), Response.ok().content(new byte[]{1, 2, 3, 4, 5}).build());
-        httpServer.httpHandler.addResponse(Method.GET, new URI("/testUtf8"),
+        httpServer.addResponse(Method.GET, new URI("/test"), Response.ok().build());
+        httpServer.addResponse(Method.GET, new URI("/test3"), Response.ok().content("TestContent").build());
+        httpServer.addResponse(Method.GET, new URI("/test2"), Response.status(Status.NOT_FOUND).build());
+        httpServer.addResponse(Method.GET, new URI("/test4"), Response.ok().content(new byte[]{1, 2, 3, 4, 5}).build());
+        httpServer.addResponse(Method.GET, new URI("/testUtf8"),
                 Response.ok().content("Cæelo", Charsets.ISO_8859_1).type("text/plain; charset=iso-8859-1").build());
 
-        httpServer.httpHandler.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
+        httpServer.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
             @Override
             public Response process(Request request) {
                 if (request.getContent().getContentAsString().equals("Test")) {
@@ -107,7 +107,7 @@ public class MockHttpServerTest {
 
     @Test(expected = NoHttpResponseException.class)
     public void testTimeout() throws IOException {
-        httpServer.httpHandler.setTimeout(true);
+        httpServer.setTimeout(true);
         HttpClient httpclient = new DefaultHttpClient();
         HttpGet httpget = new HttpGet("http://localhost:7001/timeout");
         httpclient.execute(httpget);
