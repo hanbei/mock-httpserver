@@ -25,8 +25,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URI;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MockHttpServer {
 
@@ -34,9 +32,7 @@ public class MockHttpServer {
     private final int port;
     MockHttpHandler httpHandler;
     private HttpServer server;
-    private Map<Method, Mapping<RequestProcessor>> requestProcessorMapping;
     private boolean running;
-    private boolean timeout;
 
     public MockHttpServer() {
         this(80);
@@ -49,10 +45,7 @@ public class MockHttpServer {
      */
     public MockHttpServer(int port) {
         this.port = port;
-        timeout = false;
         running = false;
-
-        requestProcessorMapping = new HashMap<Method, Mapping<RequestProcessor>>();
 
         try {
             httpHandler = new MockHttpHandler();
@@ -65,7 +58,7 @@ public class MockHttpServer {
 
     public static void main(String[] args) throws IOException {
         MockHttpServer server = new MockHttpServer(7001);
-        server.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
+        server.httpHandler.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
             @Override
             public Response process(Request request) {
                 if ("Test".equals(request.getContent().getContentAsString())) {
@@ -156,26 +149,7 @@ public class MockHttpServer {
         httpHandler.addResponse(method, uri, response);
     }
 
-    /**
-     * Add a {@link RequestProcessor} for a certain url and a method. It should make sense only POST and PUT requests as these are the only
-     * ones that have a request body.
-     *
-     * @param method    The method the response should be sent on.
-     * @param uri       The uri the request will access on. Has to be relative to the server url.
-     * @param processor The {@link RequestProcessor} that processes the request body.
-     */
     public void addRequestProcessor(Method method, URI uri, RequestProcessor processor) {
-        Mapping<RequestProcessor> mapping = this.requestProcessorMapping.get(method);
-        if (mapping == null) {
-            mapping = new Mapping<RequestProcessor>();
-            requestProcessorMapping.put(method, mapping);
-        }
-        mapping.add(trimSlashes(uri), processor);
+        httpHandler.addRequestProcessor(method, uri, processor);
     }
-
-    private String trimSlashes(URI uri) {
-        String uriString = uri.toString();
-        return uriString.replaceAll("^/|/$", "");
-    }
-
 }

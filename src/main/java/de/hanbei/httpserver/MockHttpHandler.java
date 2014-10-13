@@ -1,12 +1,16 @@
 package de.hanbei.httpserver;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Method;
 import de.hanbei.httpserver.request.Request;
 import de.hanbei.httpserver.response.Response;
 import de.hanbei.httpserver.response.ResponseWriter;
+import org.apache.commons.io.IOUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
@@ -14,17 +18,21 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.lang.Math.max;
+
 /**
  * Created by hanbei on 10/12/14.
  */
 public class MockHttpHandler implements HttpHandler {
 
     private Map<Method, Mapping<Response>> predefinedResponses;
+    private Map<Method, Mapping<RequestProcessor>> requestProcessorMapping;
 
     private Response defaultResponse;
     private boolean timeout;
 
     public MockHttpHandler() {
+        requestProcessorMapping = new HashMap<Method, Mapping<RequestProcessor>>();
         predefinedResponses = new HashMap<Method, Mapping<Response>>();
         defaultResponse = Response.notFound().build();
     }
@@ -35,14 +43,63 @@ public class MockHttpHandler implements HttpHandler {
         URI requestURI = httpExchange.getRequestURI();
 
         Response response = getResponse(requestURI, method);
+
+        Mapping<RequestProcessor> processorMapping = requestProcessorMapping.get(method);
+        if (processorMapping != null) {
+            RequestProcessor requestProcessor = processorMapping.get(trimSlashes(requestURI));
+            if (requestProcessor != null) {
+                try {
+                    Request request = portRequest(httpExchange);
+                    response = requestProcessor.process(request);
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        }
+
         try {
             if (!timeout) {
                 sendHeaders(httpExchange, response);
                 sendContent(httpExchange, response);
             }
+        } catch (Throwable t) {
+            t.printStackTrace();
         } finally {
             httpExchange.close();
         }
+    }
+
+    private Request portRequest(HttpExchange httpExchange) throws IOException {
+        Request request = new Request();
+
+        Headers requestHeaders = httpExchange.getRequestHeaders();
+        Header header = request.getHeader();
+        for (String key : requestHeaders.keySet()) {
+            for (String value : requestHeaders.get(key)) {
+                header.addParameter(key, value);
+            }
+        }
+
+        String encoding = requestHeaders.getFirst(Header.Fields.CONTENT_ENCODING);
+        if (encoding != null) {
+            request.getContent().setEncoding(encoding);
+        }
+        request.getContent().setLanguage(requestHeaders.getFirst(Header.Fields.CONTENT_LANGUAGE));
+        request.getContent().setMd5(requestHeaders.getFirst(Header.Fields.CONTENT_MD5));
+        String contentType = requestHeaders.getFirst(Header.Fields.CONTENT_TYPE);
+        if (contentType != null) {
+            request.getContent().setMimetype(contentType + ";" + encoding);
+        }
+        String contentRange = requestHeaders.getFirst(Header.Fields.CONTENT_RANGE);
+        if (contentRange != null) {
+            request.getContent().setRange(contentRange);
+        }
+
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        IOUtils.copy(httpExchange.getRequestBody(), bytes);
+        request.getContent().setContent(bytes.toByteArray());
+
+        return request;
     }
 
     private void sendContent(HttpExchange httpExchange, Response defaultResponse) throws IOException {
@@ -50,7 +107,22 @@ public class MockHttpHandler implements HttpHandler {
     }
 
     private void sendHeaders(HttpExchange httpExchange, Response response) throws IOException {
-        httpExchange.sendResponseHeaders(response.getStatus().getStatusCode(), response.getContent().getLength());
+        int length = response.getContent().getLength();
+        int statusCode = response.getStatus().getStatusCode();
+        httpExchange.sendResponseHeaders(statusCode, max(0, length));
+
+        Headers responseHeaders = httpExchange.getResponseHeaders();
+        Header headers = response.getHeader();
+        for (String headerField : headers.getHeaderFields()) {
+            for (Header.Parameter value : headers.getHeaderParameter(headerField)) {
+                responseHeaders.add(headerField, value.toString());
+            }
+        }
+        responseHeaders.add(Header.Fields.CONTENT_ENCODING, response.getContent().getEncoding());
+        responseHeaders.add(Header.Fields.CONTENT_LANGUAGE, response.getContent().getLanguage());
+        responseHeaders.add(Header.Fields.CONTENT_MD5, response.getContent().getMd5());
+        responseHeaders.add(Header.Fields.CONTENT_TYPE, response.getContent().getMimetype());
+        responseHeaders.add(Header.Fields.CONTENT_RANGE, response.getContent().getRange());
     }
 
     private Response getResponse(URI requestUri1, Method method) {
@@ -130,5 +202,22 @@ public class MockHttpHandler implements HttpHandler {
      */
     public boolean isTimeoutSet() {
         return timeout;
+    }
+
+    /**
+     * Add a {@link de.hanbei.httpserver.RequestProcessor} for a certain url and a method. It should make sense only POST and PUT requests as these are the only
+     * ones that have a request body.
+     *
+     * @param method    The method the response should be sent on.
+     * @param uri       The uri the request will access on. Has to be relative to the server url.
+     * @param processor The {@link RequestProcessor} that processes the request body.
+     */
+    public void addRequestProcessor(Method method, URI uri, RequestProcessor processor) {
+        Mapping<RequestProcessor> mapping = requestProcessorMapping.get(method);
+        if (mapping == null) {
+            mapping = new Mapping<RequestProcessor>();
+            requestProcessorMapping.put(method, mapping);
+        }
+        mapping.add(trimSlashes(uri), processor);
     }
 }

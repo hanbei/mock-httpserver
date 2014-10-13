@@ -57,7 +57,7 @@ public class MockHttpServerTest {
         httpServer.httpHandler.addResponse(Method.GET, new URI("/testUtf8"),
                 Response.ok().content("Cæelo", Charsets.ISO_8859_1).type("text/plain; charset=iso-8859-1").build());
 
-        httpServer.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
+        httpServer.httpHandler.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
             @Override
             public Response process(Request request) {
                 if (request.getContent().getContentAsString().equals("Test")) {
