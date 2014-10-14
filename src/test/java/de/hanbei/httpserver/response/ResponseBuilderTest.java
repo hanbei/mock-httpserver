@@ -17,11 +17,13 @@ import de.hanbei.httpserver.common.Header;
 import de.hanbei.httpserver.common.Status;
 import org.junit.Test;
 
-import static org.hamcrest.collection.IsCollectionContaining.hasItems;
+import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-/** Created by IntelliJ IDEA. User: hanbei Date: 27.02.11 Time: 12:58 To change this template use File | Settings | File Templates. */
+/**
+ * Created by IntelliJ IDEA. User: hanbei Date: 27.02.11 Time: 12:58 To change this template use File | Settings | File Templates.
+ */
 public class ResponseBuilderTest {
 
     @Test
@@ -39,10 +41,8 @@ public class ResponseBuilderTest {
     @Test
     public void testLanguage() throws Exception {
         Response response = Response.ok().language("en").build();
-        assertThat(response.getHeader().getHeaderValues("Accept-Language"),
-                hasItems("en"));
-        assertEquals("HTTP/1.1 200 OK\nAccept-Language: en\n\n", response
-                .toString());
+        assertThat(response.getHeader().getHeaderValues("Accept-Language"), hasItems("en"));
+        assertEquals("HTTP/1.1 200 OK\nAccept-Language: en\n\n", response.toString());
     }
 
     @Test
