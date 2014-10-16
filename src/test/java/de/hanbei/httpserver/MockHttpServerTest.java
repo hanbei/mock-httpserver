@@ -28,6 +28,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +37,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 
-import static junit.framework.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -164,6 +165,23 @@ public class MockHttpServerTest {
         assertTrue(this.httpServer.isRunning());
         this.httpServer.stop();
         assertFalse(this.httpServer.isRunning());
+    }
+
+    @Test
+    public void testConnectionProblem() throws IOException {
+        for (int i = 0; i < 3; i++) {
+            // first request
+            HttpGet httpget1 = new HttpGet("http://localhost:7001/test3");
+            HttpResponse response1 = this.httpclient.execute(httpget1);
+            assertEquals(200, response1.getStatusLine().getStatusCode());
+            EntityUtils.consume(response1.getEntity());
+
+            // second request
+            HttpGet httpget2 = new HttpGet("http://localhost:7001/test3");
+            HttpResponse response2 = this.httpclient.execute(httpget2);
+            assertEquals(200, response2.getStatusLine().getStatusCode());
+            EntityUtils.consume(response2.getEntity());
+        }
     }
 
     @After
