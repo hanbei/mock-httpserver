@@ -32,7 +32,7 @@ By default the mock httpserver just returns a 404 Not Found status code on any r
 For example to create a response that returns a HTTP status code of 200 and some json string as content use the `ResponseBuilder` as follows:
 
 ```java
-Response response = Response.ok().type("application/json").content("{\"some\":\"json\}").build();
+Response response = Response.ok().type("application/json").content("{\"some\":\"json\"}").build();
 ```
 
 To tell the mock httpserver to return this response one a GET request to `http://localhost:8888/some/json` do it like this.
