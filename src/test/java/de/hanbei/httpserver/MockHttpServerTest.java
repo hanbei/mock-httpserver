@@ -21,13 +21,16 @@ import org.apache.commons.io.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.NoHttpResponseException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -36,9 +39,10 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -58,9 +62,12 @@ public class MockHttpServerTest {
         httpServer.addResponse(Method.GET, new URI("/testUtf8"),
                 Response.ok().content("Cæelo", Charsets.ISO_8859_1).type("text/plain; charset=iso-8859-1").build());
 
+        httpServer.addResponse(Method.POST, new URI("/post2"), Response.ok().build());
+
         httpServer.addRequestProcessor(Method.POST, URI.create("post"), new RequestProcessor() {
             @Override
             public Response process(Request request) {
+                System.err.println("Request received.");
                 if (request.getContent().getContentAsString().equals("Test")) {
                     return Response.ok().build();
                 } else {
@@ -158,6 +165,26 @@ public class MockHttpServerTest {
         httpPost2.setEntity(new StringEntity("Test"));
         HttpResponse response2 = httpclient.execute(httpPost2);
         assertEquals(200, response2.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testUrlEncodedFormEntityFailsPostPredefinedResponse() throws IOException {
+        HttpPost httpPost3 = new HttpPost("http://localhost:7001/post2");
+        httpPost3.setEntity(new UrlEncodedFormEntity(Collections.<NameValuePair>singletonList(new BasicNameValuePair("test", "abc"))));
+        HttpResponse response3 = httpclient.execute(httpPost3);
+        assertEquals(200, response3.getStatusLine().getStatusCode());
+    }
+
+    /**
+     * Test for issue #8. Encoding was not set.
+     * @throws IOException
+     */
+    @Test
+    public void testUrlEncodedFormEntityFailsPostRequestProcessor() throws IOException {
+        HttpPost httpPost3 = new HttpPost("http://localhost:7001/post");
+        httpPost3.setEntity(new UrlEncodedFormEntity(Collections.<NameValuePair>singletonList(new BasicNameValuePair("test", "abc"))));
+        HttpResponse response3 = httpclient.execute(httpPost3);
+        assertEquals(401, response3.getStatusLine().getStatusCode());
     }
 
     @Test
