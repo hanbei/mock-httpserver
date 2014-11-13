@@ -18,6 +18,9 @@ import de.hanbei.httpserver.common.Header;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Arrays;
+
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class HeaderTest {
@@ -43,25 +46,32 @@ public class HeaderTest {
 
     }
 
-    @Test
-    public void testToString() {
-        assertEquals(""
-                + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\n"
-                + "Accept: text/xml,text/html;q=0.1\n"
-                + "Accept-Language: en;q=0.1,en-us;q=0.5\n"
-                + "Accept-Encoding: gzip,deflate\n"
-                , header.toString());
-    }
+	@Test
+	public void testToString() {
+		String[] expectedLines = {
+			"Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+			"Accept-Encoding: gzip,deflate",
+			"Accept-Language: en;q=0.1,en-us;q=0.5",
+			"Accept: text/xml,text/html;q=0.1"
+		};
+		String[] actualLines = this.header.toString().split("\n");
+		Arrays.sort(actualLines);
+		assertArrayEquals(expectedLines, actualLines);
+	}
 
-    @Test
-    public void testToStringWithCookie() {
-        this.header.addCookie(new Cookie("test", "test"));
-        this.header.addCookie(new Cookie("test2", "test2"));
-        assertEquals(""
-                + "Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7\n"
-                + "Accept: text/xml,text/html;q=0.1\n"
-                + "Accept-Language: en;q=0.1,en-us;q=0.5\n"
-                + "Accept-Encoding: gzip,deflate\n"
-                + "Cookie: test=test; test2=test2", header.toString());
-    }
+	@Test
+	public void testToStringWithCookie() {
+		this.header.addCookie(new Cookie("test", "test"));
+		this.header.addCookie(new Cookie("test2", "test2"));
+		String[] expectedLines = {
+			"Accept-Charset: ISO-8859-1,utf-8;q=0.7,*;q=0.7",
+			"Accept-Encoding: gzip,deflate",
+			"Accept-Language: en;q=0.1,en-us;q=0.5",
+			"Accept: text/xml,text/html;q=0.1",
+			"Cookie: test=test; test2=test2"
+		};
+		String[] actualLines = this.header.toString().split("\n");
+		Arrays.sort(actualLines);
+		assertArrayEquals(expectedLines, actualLines);
+	}
 }
