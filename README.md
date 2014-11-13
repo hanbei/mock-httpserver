@@ -82,19 +82,4 @@ assertTrue(headerValues.contains("Mozilla..."));
 
 Maven
 -----
-To include the mock-httpserver as a maven dependency into your project you need to add the following repository to your pom.xml
-
-```
-<repositories>
-   <repository>
-     <id>de.hanbei</id>
-     <url>https://raw.github.com/hanbei/mvn-repo/master</url>
-   </repository>
- </repositories>
-```
-and include it via this maven coordinates.
-```
-<groupId>de.hanbei</groupId>
-<artifactId>mock-httpserver</artifactId>
-<version>1.0.0</version>
-```
+As github removed the raw access to files I can no longer provide a Maven repository. Please clone the repo and us either a local install or your own nexus. I'm working on getting it on maven central.
