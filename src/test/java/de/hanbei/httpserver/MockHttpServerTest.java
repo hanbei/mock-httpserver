@@ -119,6 +119,7 @@ public class MockHttpServerTest {
         httpget.setHeader("Accept-Charset", Charsets.ISO_8859_1.name());
         HttpResponse response = httpclient.execute(httpget);
         assertEquals(200, response.getStatusLine().getStatusCode());
+        assertEquals("text/plain; charset=iso-8859-1", response.getFirstHeader("Content-Type").getValue());
         HttpEntity entity = response.getEntity();
         String content = IOUtils.toString(entity.getContent(), Charsets.ISO_8859_1);
         assertEquals("Cæelo", content.trim());
