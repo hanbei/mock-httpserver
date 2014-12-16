@@ -102,7 +102,6 @@ class MockHttpHandler implements HttpHandler {
     private void sendHeaders(HttpExchange httpExchange, Response response) throws IOException {
         int length = response.getContent().getLength();
         int statusCode = response.getStatus().getStatusCode();
-        httpExchange.sendResponseHeaders(statusCode, max(0, length));
 
         Headers responseHeaders = httpExchange.getResponseHeaders();
         Header headers = response.getHeader();
@@ -111,11 +110,18 @@ class MockHttpHandler implements HttpHandler {
                 responseHeaders.add(headerField, value.toString());
             }
         }
-        responseHeaders.add(Header.Fields.CONTENT_ENCODING, response.getContent().getEncoding());
-        responseHeaders.add(Header.Fields.CONTENT_LANGUAGE, response.getContent().getLanguage());
-        responseHeaders.add(Header.Fields.CONTENT_MD5, response.getContent().getMd5());
-        responseHeaders.add(Header.Fields.CONTENT_TYPE, response.getContent().getMimetype());
-        responseHeaders.add(Header.Fields.CONTENT_RANGE, response.getContent().getRange());
+        addHeaderIfSet(responseHeaders, Header.Fields.CONTENT_ENCODING, response.getContent().getEncoding());
+        addHeaderIfSet(responseHeaders, Header.Fields.CONTENT_LANGUAGE, response.getContent().getLanguage());
+        addHeaderIfSet(responseHeaders, Header.Fields.CONTENT_MD5, response.getContent().getMd5());
+        addHeaderIfSet(responseHeaders, Header.Fields.CONTENT_TYPE, response.getContent().getComposedContentType());
+        addHeaderIfSet(responseHeaders, Header.Fields.CONTENT_RANGE, response.getContent().getRange());
+        httpExchange.sendResponseHeaders(statusCode, max(0, length));
+    }
+
+    private void addHeaderIfSet(Headers responseHeaders, String name, String value) {
+        if(value != null) {
+            responseHeaders.add(name, value);
+        }
     }
 
     private Response getResponse(URI requestUri1, Method method) {

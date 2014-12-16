@@ -42,6 +42,17 @@ public class Content {
     private String range;
     private boolean string;
 
+    public String getComposedContentType() {
+        if ( mimetype != null ) {
+            if ( charset == null ) {
+                return mimetype;
+            } else {
+                return mimetype + "; charset=" + charset;
+            }
+        }
+        return null;
+    }
+
     public String getMimetype() {
         return mimetype;
     }
