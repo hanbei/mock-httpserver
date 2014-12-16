@@ -81,7 +81,11 @@ class MockHttpHandler implements HttpHandler {
         request.getContent().setMd5(requestHeaders.getFirst(Header.Fields.CONTENT_MD5));
         String contentType = requestHeaders.getFirst(Header.Fields.CONTENT_TYPE);
         if (contentType != null) {
-            request.getContent().setMimetype(contentType + ";" + encoding);
+            if (encoding != null) {
+                request.getContent().setMimetype(contentType + ";" + encoding);
+            } else {
+                request.getContent().setMimetype(contentType);
+            }
         }
         String contentRange = requestHeaders.getFirst(Header.Fields.CONTENT_RANGE);
         if (contentRange != null) {
