@@ -198,7 +198,6 @@ public class ResponseBuilder {
      * @return A ResponseBuilder to add additional information.
      */
     public ResponseBuilder type(String type) {
-        response.getHeader().addParameter("Accept", type);
         response.getContent().setMimetype(type);
         return this;
     }
