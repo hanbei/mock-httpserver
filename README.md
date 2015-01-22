@@ -84,4 +84,11 @@ assertTrue(headerValues.contains("Mozilla..."));
 
 Maven
 -----
-As github removed the raw access to files I can no longer provide a Maven repository. Please clone the repo and us either a local install or your own nexus. I'm working on getting it on maven central.
+Since version 1.0.2 mock-httpserver is deployed on maven central. It can be included with the following coordinates.
+```
+<dependency>
+    <groupId>de.hanbei</groupId>
+    <artifactId>mock-httpserver</artifactId>
+    <version>1.0.2</version>
+</dependency>
+```
