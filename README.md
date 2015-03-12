@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/hanbei/mock-httpserver.svg)](https://travis-ci.org/hanbei/mock-httpserver)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/de.hanbei/mock-httpserver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/de.hanbei/mock-httpserver)
 
 mock-httpserver
 ===============
